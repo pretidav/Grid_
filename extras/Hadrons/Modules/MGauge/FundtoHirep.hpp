@@ -38,7 +38,7 @@ See the full license in the file "LICENSE" in the top level distribution directo
 BEGIN_HADRONS_NAMESPACE
 
 /******************************************************************************
- *                         Load a NERSC configuration                         *
+ *                     Update Fund configuration to Hirep                     *
  ******************************************************************************/
 BEGIN_MODULE_NAMESPACE(MGauge)
 
@@ -46,10 +46,10 @@ class FundtoHirepPar: Serializable
 {
 public:
     GRID_SERIALIZABLE_CLASS_MEMBERS(FundtoHirepPar,
-                                    std::string, gaugeconf);
+                                    std::string, gaugein);
 };
 
-template <class Rep>
+template <typename Rep>
 class TFundtoHirep: public Module<FundtoHirepPar>
 {
 public:
@@ -61,14 +61,14 @@ public:
     virtual std::vector<std::string> getInput(void);
     virtual std::vector<std::string> getOutput(void);
     // setup
-    void setup(void);
+    virtual void setup(void);
     // execution
-    void execute(void);
+    virtual void execute(void);
 };
 
-//MODULE_REGISTER_NS(FundtoAdjoint,   TFundtoHirep<AdjointRepresentation>, MGauge);
-//MODULE_REGISTER_NS(FundtoTwoIndexSym, TFundtoHirep<TwoIndexSymmetricRepresentation>, MGauge);
-//MODULE_REGISTER_NS(FundtoTwoIndexAsym, TFundtoHirep<TwoIndexAntiSymmetricRepresentation>, MGauge);
+MODULE_REGISTER_NS(FundtoAdjoint,      TFundtoHirep<AdjointRepresentation>, MGauge); 
+MODULE_REGISTER_NS(FundtoTwoIndexSym,  TFundtoHirep<TwoIndexSymmetricRepresentation>, MGauge);
+MODULE_REGISTER_NS(FundtoTwoIndexAsym, TFundtoHirep<TwoIndexAntiSymmetricRepresentation>, MGauge);
 
 END_MODULE_NAMESPACE
 

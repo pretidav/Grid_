@@ -44,23 +44,19 @@ int main(int argc, char *argv[])
     // run setup ///////////////////////////////////////////////////////////////
     Application              application;
     std::vector<std::string> flavour = {"l"};
-    std::vector<double>      mass    = {-0.1};
-    double                   csw     = 0.0;
+    std::vector<double>      mass    = {-0.01};
+    double                   csw     = 1.0;
     
     // global parameters
-    Application::GlobalPar globalPar;
   
-    globalPar.trajCounter.start = 1;
-    globalPar.trajCounter.end   = 2;
-    globalPar.trajCounter.step  = 1;
-
-    globalPar.trajCounter.start = 309;
-    globalPar.trajCounter.end   = 310;
-    globalPar.trajCounter.step  = 1;
+    Application::GlobalPar globalPar;
+    globalPar.trajCounter.start = 1500;
+    globalPar.trajCounter.end   = 1520;
+    globalPar.trajCounter.step  = 20;
     globalPar.seed              = "1 2 3 4";
     application.setPar(globalPar);
     // gauge field
-    application.createModule<MGauge::Load>("gauge");
+    application.createModule<MGauge::Random>("gauge");
    //application.createModule<MGauge::Unit>("gauge");
    
     // sources
@@ -77,7 +73,7 @@ int main(int argc, char *argv[])
     application.createModule<MSink::ScalarPoint>("sink", sinkPar);
     
     // set fermion boundary conditions to be periodic space, antiperiodic time.
-    std::string boundary = "1 1 1 -1";
+    std::string boundary = "1 1 1 1";
 
     for (unsigned int i = 0; i < flavour.size(); ++i)
     {
@@ -117,7 +113,7 @@ int main(int argc, char *argv[])
     {
         MContraction::Meson::Par mesPar;
         
-        mesPar.output  = "Fund_mesons/pt_" + flavour[i] + flavour[j];
+        mesPar.output  = "mesons/pt_" + flavour[i] + flavour[j];
         mesPar.q1      = "Qpt_" + flavour[i];
         mesPar.q2      = "Qpt_" + flavour[j];
         mesPar.gammas  = "all";

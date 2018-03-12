@@ -32,27 +32,32 @@ using namespace Hadrons;
 
 
     BEGIN_HADRONS_NAMESPACE
+
     BEGIN_MODULE_NAMESPACE(MFermion)
     MODULE_REGISTER_NS(GaugeProp2AS, TGaugeProp<WilsonTwoIndexAntiSymmetricImplR>, MFermion);
     END_MODULE_NAMESPACE
+
     BEGIN_MODULE_NAMESPACE(MSource)
     MODULE_REGISTER_NS(Point2AS, TPoint<WilsonTwoIndexAntiSymmetricImplR>, MSource);
     END_MODULE_NAMESPACE
+    
     BEGIN_MODULE_NAMESPACE(MContraction)
     MODULE_REGISTER_NS(Meson2AS, ARG(TMeson<WilsonTwoIndexAntiSymmetricImplR, WilsonTwoIndexAntiSymmetricImplR>), MContraction);
-//    MODULE_REGISTER_NS(BaryonMultirep, ARG(TBaryon<FIMPL, FIMPL, FIMPL>), MContraction);
     END_MODULE_NAMESPACE
+
     BEGIN_MODULE_NAMESPACE(MSink)
-    MODULE_REGISTER_NS(ScalarPoint2AS, TPoint<WilsonTwoIndexAntiSymmetricImplR>, MSink);
+    MODULE_REGISTER_NS(Point2AS,     TPoint<WilsonTwoIndexAntiSymmetricImplR>, MSink);
     END_MODULE_NAMESPACE
+
     BEGIN_MODULE_NAMESPACE(MSolver)
     MODULE_REGISTER_NS(RBPrecCG2AS, TRBPrecCG<WilsonTwoIndexAntiSymmetricImplR>, MSolver);
     END_MODULE_NAMESPACE
+
     BEGIN_MODULE_NAMESPACE(MAction)
     MODULE_REGISTER_NS(WilsonClover2AS, TWilsonClover<WilsonTwoIndexAntiSymmetricImplR>, MAction);
     END_MODULE_NAMESPACE
-    END_HADRONS_NAMESPACE
 
+    END_HADRONS_NAMESPACE
 
 int main(int argc, char *argv[])
 {
@@ -64,36 +69,53 @@ int main(int argc, char *argv[])
     HadronsLogIterative.Active(GridLogIterative.isActive());
     HadronsLogDebug.Active(GridLogDebug.isActive());
     LOG(Message) << "Grid initialized" << std::endl;
+    
     // run setup ///////////////////////////////////////////////////////////////
     Application              application;
-    std::vector<std::string> flavour = {"l", "s"};
-    std::vector<double>      mass    = {-0.01, -0.04};
+    std::vector<std::string> flavour = {"l"};
+    std::vector<double>      mass    = {-0.01};
     double                   csw     = 1.0;
-    // global parameters
+
+    //Global parameters
     Application::GlobalPar globalPar;
     globalPar.trajCounter.start = 1500;
     globalPar.trajCounter.end   = 1520;
     globalPar.trajCounter.step  = 20;
     globalPar.seed              = "1 2 3 4";
     application.setPar(globalPar);
-    // gauge field
-    application.createModule<MGauge::Unit>("gauge");
+
+    //Gauge field
+    application.createModule<MGauge::Random>("gauge");
+
+    //Update Representation
+    MGauge::FundtoTwoIndexAsym::Par GroupPar;
+    GroupPar.gaugein = "gauge";
+    application.createModule<MGauge::FundtoTwoIndexAsym>("gauge_Hirep",GroupPar);
+
+    //Source
     MSource::Point2AS::Par ptPar;
     ptPar.position = "0 0 0 0";
     application.createModule<MSource::Point2AS>("pt", ptPar);
-    // sink
-    MSink::ScalarPoint2AS::Par sinkPar;
+   
+    //Sink
+    MSink::ScalarPoint::Par sinkPar;
     sinkPar.mom = "0 0 0";
-    application.createModule<MSink::ScalarPoint2AS>("sink", sinkPar);
-    
-    // set fermion boundary conditions to be periodic space, antiperiodic time.
-    std::string boundary = "1 1 1 -1";
+    application.createModule<MSink::ScalarPoint>("sink", sinkPar);
+
+/*
+    MSink::Point2AS::Par sinkPar;
+    sinkPar.mom = "0 0 0" ;
+    application.createModule<MSink::Point2AS>("sink", sinkPar);
+*/
+
+    //Set fermion boundary conditions to be periodic space, antiperiodic time.
+    std::string boundary = "1 1 1 1";
 
     for (unsigned int i = 0; i < flavour.size(); ++i)
     {
         // actions
         MAction::WilsonClover2AS::Par actionPar;
-        actionPar.gauge = "gauge";
+        actionPar.gauge = "gauge_Hirep";
         actionPar.mass  = mass[i];
         actionPar.csw_r = csw;
 	    actionPar.csw_t = csw;
@@ -110,14 +132,12 @@ int main(int argc, char *argv[])
         solverPar.residual = 1.0e-8;
         application.createModule<MSolver::RBPrecCG2AS>("CG_" + flavour[i],
                                                     solverPar);
-        
+           
         // propagators
         MFermion::GaugeProp2AS::Par quarkPar;
         quarkPar.solver = "CG_" + flavour[i];
         quarkPar.source = "pt";
         application.createModule<MFermion::GaugeProp2AS>("Qpt_" + flavour[i], quarkPar);
-        quarkPar.source = "z2";
-        application.createModule<MFermion::GaugeProp2AS>("QZ2_" + flavour[i], quarkPar);
     }
     for (unsigned int i = 0; i < flavour.size(); ++i)
     for (unsigned int j = i; j < flavour.size(); ++j)
@@ -133,29 +153,8 @@ int main(int argc, char *argv[])
                                                       + flavour[i] + flavour[j],
                                                       mesPar);
      
-     //   mesPar.output  = "mesons2AS/Z2_" + flavour[i] + flavour[j];
-     //   mesPar.q1      = "QZ2_" + flavour[i];
-     //   mesPar.q2      = "QZ2_" + flavour[j];
-     //   mesPar.gammas  = "all";
-     //   mesPar.sink    = "sink";
-     //   application.createModule<MContraction::Meson2AS>("meson_Z2_"
-     //                                                 + flavour[i] + flavour[j],
-     //                                                 mesPar);
     }
-    for (unsigned int i = 0; i < flavour.size(); ++i)
-    for (unsigned int j = i; j < flavour.size(); ++j)
-    for (unsigned int k = j; k < flavour.size(); ++k)
-    {
-        MContraction::Baryon::Par barPar;
-        
-        barPar.output = "baryons/pt_" + flavour[i] + flavour[j] + flavour[k];
-        barPar.q1     = "Qpt_" + flavour[i];
-        barPar.q2     = "Qpt_" + flavour[j];
-        barPar.q3     = "Qpt_" + flavour[k];
-        application.createModule<MContraction::Baryon>(
-            "baryon_pt_" + flavour[i] + flavour[j] + flavour[k], barPar);
-    }
-    
+   
     // execution
     application.saveParameterFile("spectrum.xml");
     application.run();

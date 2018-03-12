@@ -69,6 +69,9 @@ typedef typename FImpl::SitePropagator               SitePropagator##suffix;   \
 typedef std::vector<typename FImpl::SitePropagator::scalar_object>             \
                                                      SlicedPropagator##suffix;
 
+//#define GAUGE_REP_ALIASES(Rep, suffix)\
+typedef typename Rep::LatticeField LatticeField##suffix;
+
 #define GAUGE_TYPE_ALIASES(FImpl, suffix)\
 typedef typename FImpl::DoubledGaugeField DoubledGaugeField##suffix;
 

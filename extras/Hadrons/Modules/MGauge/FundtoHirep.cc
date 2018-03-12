@@ -33,43 +33,44 @@ using namespace Hadrons;
 using namespace MGauge;
 
 // constructor /////////////////////////////////////////////////////////////////
-template <class Rep>
-TFundtoHirep<Rep>::TFundtoHirep(const std::string name)
+template <typename Rep>
+TFundtoHirep<Rep>::TFundtoHirep(const std::string name) 
 : Module<FundtoHirepPar>(name)
 {}
 
 // dependencies/products ///////////////////////////////////////////////////////
-template <class Rep>
-std::vector<std::string> TFundtoHirep<Rep>::getInput(void)
+template <typename Rep>
+std::vector<std::string> TFundtoHirep<Rep>::getInput(void) 
 {
-    std::vector<std::string> in;
-    return in;
+    std::vector<std::string> in = {par().gaugein};   
+    return in; 
 }
 
-template <class Rep>
-std::vector<std::string> TFundtoHirep<Rep>::getOutput(void)
+template <typename Rep>
+std::vector<std::string> TFundtoHirep<Rep>::getOutput(void) 
 {
-    std::vector<std::string> out = {getName()};
-    return out;
+   std::vector<std::string> out = {getName()};
+   return out;
 }
 
 // setup ///////////////////////////////////////////////////////////////////////
 template <typename Rep>
-void TFundtoHirep<Rep>::setup(void)
+void TFundtoHirep<Rep>::setup(void) 
 {
-    env().template registerLattice<typename Rep::LatticeField>(getName());
+   env().template registerLattice<typename Rep::LatticeField>(getName());
+
 }
 
 // execution ///////////////////////////////////////////////////////////////////
-template <class Rep>
-void TFundtoHirep<Rep>::execute(void)
-{
-    auto &U      = *env().template getObject<LatticeGaugeField>(par().gaugeconf);
+template <typename Rep>
+void TFundtoHirep<Rep>::execute(void) 
+{   
+    auto &U = *env().template getObject<LatticeGaugeField>(par().gaugein);
     LOG(Message) << "Transforming Representation" << std::endl;
 
     Rep TargetRepresentation(U._grid);
     TargetRepresentation.update_representation(U);
 
-   typename Rep::LatticeField &URep = *env().template createLattice<typename Rep::LatticeField>(getName());
+    typename Rep::LatticeField &URep = *env().template createLattice<typename Rep::LatticeField>(getName());
     URep = TargetRepresentation.U;
 }

@@ -46,7 +46,7 @@ using namespace Hadrons;
     END_MODULE_NAMESPACE
 
     BEGIN_MODULE_NAMESPACE(MSink)
-    MODULE_REGISTER_NS(Point2AS,     TPoint<WilsonTwoIndexAntiSymmetricImplR>, MSink);
+    MODULE_REGISTER_NS(Point2AS, TPoint<WilsonTwoIndexAntiSymmetricImplR>, MSink);
     END_MODULE_NAMESPACE
 
     BEGIN_MODULE_NAMESPACE(MSolver)
@@ -56,6 +56,10 @@ using namespace Hadrons;
     BEGIN_MODULE_NAMESPACE(MAction)
     MODULE_REGISTER_NS(WilsonClover2AS, TWilsonClover<WilsonTwoIndexAntiSymmetricImplR>, MAction);
     END_MODULE_NAMESPACE
+
+   // BEGIN_MODULE_NAMESPACE(MGauge)
+  //  MODULE_REGISTER_NS(FundtoTwoIndexAsym, TFundtoHirep<TwoIndexAntiSymmetricRepresentation>, MGauge);
+  //  END_MODULE_NAMESPACE
 
     END_HADRONS_NAMESPACE
 

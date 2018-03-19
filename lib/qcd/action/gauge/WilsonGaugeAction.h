@@ -93,6 +93,85 @@ private:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+// Anisotropic Wilson gauge action
+template <class Gimpl>
+class WilsonGaugeActionAnisotropic : public Action<typename Gimpl::GaugeField> {
+ public:  
+  INHERIT_GIMPL_TYPES(Gimpl);
+
+// Fully anisotropic bare coupling (Nd betas for each lattice site).
+ private:
+  typedef Lattice< iVector<iScalar<iScalar<Real > >, Nd > > LatticeBeta;
+  LatticeBeta Lbeta; 
+
+  /////////////////////////// constructors
+  explicit WilsonGaugeActionAnisotropic(LatticeBeta Lbeta_):Lbeta(Lbeta_){};
+
+  virtual std::string action_name() {return "WilsonGaugeActionAnisotropic";}
+
+
+
+  virtual std::string LogParameters(){
+    std::stringstream sstream;
+
+    //explicit loop over the volume: TODO
+    for (int i=0;i<Nd;i++){
+      sstream << GridLogMessage << "[WilsonGaugeActionAnisotropic] LatticeBeta[" << i <<"]:" << Lbeta << std::endl;
+    }
+    return sstream.str();
+  }
+
+  virtual void refresh(const GaugeField &U,
+                       GridParallelRNG &pRNG){};  // noop as no pseudoferms
+
+  virtual RealD S(const GaugeField &U) {
+    RealD plaq = WilsonLoops<Gimpl>::avgPlaquette(U);
+
+    //explicit loop over volume: TODO
+    RealD vol = U._grid->gSites();
+    RealD action = beta * (1.0 - plaq) * (Nd * (Nd - 1.0)) * vol * 0.5;
+    return action;
+  };
+
+  virtual void deriv(const GaugeField &U, GaugeField &dSdU) {
+    // not optimal implementation FIXME
+    // extend Ta to include Lorentz indexes
+
+    //explicit loop over volume: TODO 
+    RealD factor = 0.5 * beta / RealD(Nc);
+
+    //GaugeLinkField Umu(U._grid);
+    GaugeLinkField dSdU_mu(U._grid);
+    for (int mu = 0; mu < Nd; mu++) {
+      //Umu = PeekIndex<LorentzIndex>(U, mu);
+
+      // Staple in direction mu
+      //WilsonLoops<Gimpl>::Staple(dSdU_mu, U, mu);
+      //dSdU_mu = Ta(Umu * dSdU_mu) * factor;
+
+  
+      WilsonLoops<Gimpl>::StapleMult(dSdU_mu, U, mu);
+      dSdU_mu = Ta(dSdU_mu) * factor;
+
+      PokeIndex<LorentzIndex>(dSdU, dSdU_mu, mu);
+    }
+  }
+private:
+  RealD beta;  
+};
+
+
 }
 }
 

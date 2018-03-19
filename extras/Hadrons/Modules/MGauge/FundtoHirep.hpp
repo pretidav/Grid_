@@ -70,6 +70,50 @@ MODULE_REGISTER_NS(FundtoAdjoint,      TFundtoHirep<AdjointRepresentation>, MGau
 MODULE_REGISTER_NS(FundtoTwoIndexSym,  TFundtoHirep<TwoIndexSymmetricRepresentation>, MGauge);
 MODULE_REGISTER_NS(FundtoTwoIndexAsym, TFundtoHirep<TwoIndexAntiSymmetricRepresentation>, MGauge);
 
+// constructor /////////////////////////////////////////////////////////////////
+template <typename Rep>
+TFundtoHirep<Rep>::TFundtoHirep(const std::string name) 
+: Module<FundtoHirepPar>(name)
+{}
+
+// dependencies/products ///////////////////////////////////////////////////////
+template <typename Rep>
+std::vector<std::string> TFundtoHirep<Rep>::getInput(void) 
+{
+    std::vector<std::string> in = {par().gaugein};   
+    return in; 
+}
+
+template <typename Rep>
+std::vector<std::string> TFundtoHirep<Rep>::getOutput(void) 
+{
+   std::vector<std::string> out = {getName()};
+   return out;
+}
+
+// setup ///////////////////////////////////////////////////////////////////////
+template <typename Rep>
+void TFundtoHirep<Rep>::setup(void) 
+{
+   env().template registerLattice<typename Rep::LatticeField>(getName());
+
+}
+
+// execution ///////////////////////////////////////////////////////////////////
+template <typename Rep>
+void TFundtoHirep<Rep>::execute(void) 
+{   
+    auto &U = *env().template getObject<LatticeGaugeField>(par().gaugein);
+    LOG(Message) << "Transforming Representation" << std::endl;
+
+    Rep TargetRepresentation(U._grid);
+    TargetRepresentation.update_representation(U);
+
+    typename Rep::LatticeField &URep = *env().template createLattice<typename Rep::LatticeField>(getName());
+    URep = TargetRepresentation.U;
+}
+
+
 END_MODULE_NAMESPACE
 
 END_HADRONS_NAMESPACE

@@ -129,6 +129,54 @@ public:
   static inline bool isPeriodicGaugeField(void) { return false; }
 };
 
+/*   WRITE ME! Dirichlet!
+template <class covariant>
+  static Lattice<covariant> CovShiftForward(const GaugeLinkField &Link, int mu,
+                                            const Lattice<covariant> &field) {
+    return ConjugateBC::CovShiftForward(Link, mu, field);
+  }
+
+  template <class covariant>
+  static Lattice<covariant> CovShiftBackward(const GaugeLinkField &Link, int mu,
+                                             const Lattice<covariant> &field) {
+    return ConjugateBC::CovShiftBackward(Link, mu, field);
+  }
+
+  static inline GaugeLinkField
+  CovShiftIdentityBackward(const GaugeLinkField &Link, int mu) {
+    GridBase *grid = Link._grid;
+    int Lmu = grid->GlobalDimensions()[mu] - 1;
+
+    Lattice<iScalar<vInteger>> coor(grid);
+    LatticeCoordinate(coor, mu);
+
+    GaugeLinkField tmp(grid);
+    tmp = adj(Link);
+    tmp = where(coor == Lmu, conjugate(tmp), tmp);
+    return Cshift(tmp, mu, -1); // moves towards positive mu
+  }
+  static inline GaugeLinkField
+  CovShiftIdentityForward(const GaugeLinkField &Link, int mu) {
+    return Link;
+  }
+
+  static inline GaugeLinkField ShiftStaple(const GaugeLinkField &Link, int mu) {
+    GridBase *grid = Link._grid;
+    int Lmu = grid->GlobalDimensions()[mu] - 1;
+
+    Lattice<iScalar<vInteger>> coor(grid);
+    LatticeCoordinate(coor, mu);
+
+    GaugeLinkField tmp(grid);
+    tmp = Cshift(Link, mu, 1);
+    tmp = where(coor == Lmu, conjugate(tmp), tmp);
+    return tmp;
+  }
+
+  static inline bool isPeriodicGaugeField(void) { return false; }
+};
+*/
+
 typedef PeriodicGaugeImpl<GimplTypesR> PeriodicGimplR; // Real.. whichever prec
 typedef PeriodicGaugeImpl<GimplTypesF> PeriodicGimplF; // Float
 typedef PeriodicGaugeImpl<GimplTypesD> PeriodicGimplD; // Double

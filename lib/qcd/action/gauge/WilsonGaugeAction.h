@@ -120,8 +120,6 @@ class WilsonGaugeActionAnisotropic : public Action<typename Gimpl::GaugeField> {
 
   virtual std::string action_name() {return "WilsonGaugeActionAnisotropic";}
 
-
-
   virtual std::string LogParameters(){
     std::stringstream sstream;
 
@@ -136,11 +134,24 @@ class WilsonGaugeActionAnisotropic : public Action<typename Gimpl::GaugeField> {
                        GridParallelRNG &pRNG){};  // noop as no pseudoferms
 
   virtual RealD S(const GaugeField &U) {
+
+    // FIXME. I have to weight with beta before the average!!!!!
     RealD plaq = WilsonLoops<Gimpl>::avgPlaquette(U);
+
+    //RealD beta_OneMinusPlaq = WilsonLoops<Gimpl>::OneMinusavgPlaquetteAnisotropy(U,Lbeta);    
 
     //explicit loop over volume: TODO
     RealD vol = U._grid->gSites();
-    RealD action = beta * (1.0 - plaq) * (Nd * (Nd - 1.0)) * vol * 0.5;
+    int X = U._grid->GlobalDimensions()[0];
+    int Y = U._grid->GlobalDimensions()[1];
+    int Z = U._grid->GlobalDimensions()[2];
+    
+    if (!isPeriodicGaugeField) vol -= X*Y*Z;  //subtraction of the Wall slice (needed for avoiding periodic). 
+
+    RealD action = Lbeta * (1.0 - plaq) * (Nd * (Nd - 1.0)) * vol * 0.5;
+  // RealD action = ( beta_OneMinusPlaq ) * (Nd * (Nd - 1.0)) * vol * 0.5;
+
+
     return action;
   };
 

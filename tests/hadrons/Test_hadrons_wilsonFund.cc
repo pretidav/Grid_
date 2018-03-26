@@ -43,8 +43,8 @@ int main(int argc, char *argv[])
     
     // run setup ///////////////////////////////////////////////////////////////
     Application              application;
-    std::vector<std::string> flavour = {"l"};
-    std::vector<double>      mass    = {-0.01};
+    std::vector<std::string> flavour = {"l","h"};
+    std::vector<double>      mass    = {-0.01,-0.1};
     double                   csw     = 1.0;
     
     // global parameters
@@ -105,8 +105,6 @@ int main(int argc, char *argv[])
         quarkPar.solver = "CG_" + flavour[i];
         quarkPar.source = "pt";
         application.createModule<MFermion::GaugeProp>("Qpt_" + flavour[i], quarkPar);
- //       quarkPar.source = "z2";
- //       application.createModule<MFermion::GaugeProp>("QZ2_" + flavour[i], quarkPar);
     }
     for (unsigned int i = 0; i < flavour.size(); ++i)
     for (unsigned int j = i; j < flavour.size(); ++j)
@@ -121,14 +119,6 @@ int main(int argc, char *argv[])
         application.createModule<MContraction::Meson>("meson_pt_"
                                                       + flavour[i] + flavour[j],
                                                       mesPar);
-   //     mesPar.output  = "mesons/Z2_" + flavour[i] + flavour[j];
-   //     mesPar.q1      = "QZ2_" + flavour[i];
-   //     mesPar.q2      = "QZ2_" + flavour[j];
-   //     mesPar.gammas  = "all";
-   //     mesPar.sink    = "sink";
-   //     application.createModule<MContraction::Meson>("meson_Z2_"
-   //                                                   + flavour[i] + flavour[j],
-   //                                                   mesPar);
     }
     for (unsigned int i = 0; i < flavour.size(); ++i)
     for (unsigned int j = i; j < flavour.size(); ++j)
@@ -136,7 +126,7 @@ int main(int argc, char *argv[])
     {
         MContraction::Baryon::Par barPar;
         
-        barPar.output = "Fund_baryons/pt_" + flavour[i] + flavour[j] + flavour[k];
+        barPar.output = "baryons/pt_" + flavour[i] + flavour[j] + flavour[k];
         barPar.q1     = "Qpt_" + flavour[i];
         barPar.q2     = "Qpt_" + flavour[j];
         barPar.q3     = "Qpt_" + flavour[k];

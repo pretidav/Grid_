@@ -45,6 +45,10 @@ using namespace Hadrons;
     MODULE_REGISTER_NS(Meson2AS, ARG(TMeson<WilsonTwoIndexAntiSymmetricImplR, WilsonTwoIndexAntiSymmetricImplR>), MContraction);
     END_MODULE_NAMESPACE
 
+    BEGIN_MODULE_NAMESPACE(MContraction)
+    MODULE_REGISTER_NS(Baryon2AS, ARG(TBaryon<WilsonTwoIndexAntiSymmetricImplR, WilsonImplR, WilsonImplR>), MContraction);
+    END_MODULE_NAMESPACE
+
     BEGIN_MODULE_NAMESPACE(MSink)
     MODULE_REGISTER_NS(Point2AS, TPoint<WilsonTwoIndexAntiSymmetricImplR>, MSink);
     END_MODULE_NAMESPACE
@@ -57,10 +61,7 @@ using namespace Hadrons;
     MODULE_REGISTER_NS(WilsonClover2AS, TWilsonClover<WilsonTwoIndexAntiSymmetricImplR>, MAction);
     END_MODULE_NAMESPACE
 
-   // BEGIN_MODULE_NAMESPACE(MGauge)
-  //  MODULE_REGISTER_NS(FundtoTwoIndexAsym, TFundtoHirep<TwoIndexAntiSymmetricRepresentation>, MGauge);
-  //  END_MODULE_NAMESPACE
-
+   
     END_HADRONS_NAMESPACE
 
 int main(int argc, char *argv[])
@@ -158,7 +159,21 @@ int main(int argc, char *argv[])
                                                       mesPar);
      
     }
-   
+/*
+    for (unsigned int i = 0; i < flavour.size(); ++i)
+    for (unsigned int j = i; j < flavour.size(); ++j)
+    for (unsigned int k = j; k < flavour.size(); ++k)
+    {
+        MContraction::Baryon2AS::Par barPar;
+        
+        barPar.output = "baryons2AS/pt_" + flavour[i] + flavour[j] + flavour[k];
+        barPar.q1     = "Qpt_" + flavour[i];
+        barPar.q2     = "Qpt_" + flavour[j];
+        barPar.q3     = "Qpt_" + flavour[k];
+        application.createModule<MContraction::Baryon2AS>(
+            "baryon_pt_" + flavour[i] + flavour[j] + flavour[k], barPar);
+    }
+   */
     // execution
     application.saveParameterFile("spectrum.xml");
     application.run();

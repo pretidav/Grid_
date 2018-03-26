@@ -172,7 +172,7 @@ void TBaryon<FImpl1, FImpl2, FImpl3>::execute(void)
    g5()(3,3)()= -1;
    
    Cconj= zero;
-   Cconj=-gT*gY;
+   Cconj=-gT*gY;    //check the minus sign!!!!
 
   //Prepare useful factors 
     RealD four = 4.;
@@ -180,11 +180,12 @@ void TBaryon<FImpl1, FImpl2, FImpl3>::execute(void)
     RealD norm = 1./6.;
 
   //Prepare antisymmetric tensor epsilon 
-  int ep[3][Nc];
-  int em[3][Nc];
+/* if (Nc==3){
+  int Nperm=3;
+  int ep[Nperm][Nc];
+  int em[Nperm][Nc];
   int contp=0,contm=0;
-  int S1,S2,S3; //,S4,S5,S6;  more if SU(N>3)
-
+  int S1,S2,S3;  
   for (int i=0;i<Nc;i++){
     for (int j=0;j<Nc;j++){
       for (int k=0;k<Nc;k++){
@@ -205,6 +206,166 @@ void TBaryon<FImpl1, FImpl2, FImpl3>::execute(void)
       }
     }
   }
+
+} else if (Nc==4){
+  */
+  int Nperm=12; //Nc!/2   
+  int ep[12][Nc];
+  int em[12][Nc];
+  int contp=0,contm=0;
+  int S1,S2,S3,S4,S5,S6;                                                                                                                                                          
+  for (int i=0;i<Nc;i++){
+    for (int j=0;j<Nc;j++){
+      for (int k=0;k<Nc;k++){
+      	for (int l=0;l<Nc;l++){
+	        S1=Sign(i,j);
+	        S2=Sign(i,k);
+	        S3=Sign(i,l);
+	        S4=Sign(j,k);
+	        S5=Sign(j,l);
+	        S6=Sign(k,l);
+	        if ((S1*S2*S3*S4*S5*S6)>0){
+	          ep[contp][0]=i;
+	          ep[contp][1]=j;
+	          ep[contp][2]=k;
+	          ep[contp][3]=l;
+	          contp++;
+	        } else if ((S1*S2*S3*S4*S5*S6)<0){
+	          em[contm][0]=i;
+	          em[contm][1]=j;
+	          em[contm][2]=k;
+	          em[contm][3]=l;
+	          contm++;
+	        }
+	      }
+      }
+    }
+  }
+  //Mapping (i,j) -> A , with i,j=1,...,4 and A=1,...,6
+  int A[Nc][Nc];
+  int cont=0;
+  for (int a=1;a<Nc;a++){
+    for (int b=0;b<a;b++){
+      A[a][b]=cont;
+      A[b][a]=cont;
+      cont++;
+    }
+  } 
+/* 
+} else if (Nc==5){
+  int Nperm=60; //Nc!/2   
+  int ep[Nperm][Nc];
+  int em[Nperm][Nc];
+  int contp=0,contm=0;
+  int S1,S2,S3,S4,S5,S6,S7,S8,S9,S10;
+  for (int i=0;i<Nc;i++){
+    for (int j=0;j<Nc;j++){
+      for (int k=0;k<Nc;k++){
+	      for (int l=0;l<Nc;l++){
+	        for (int m=0;m<Nc;m++){
+            S1=Sign(i,j);
+            S2=Sign(i,k);
+            S3=Sign(i,l);
+            S4=Sign(i,m);
+            S5=Sign(j,k);
+            S6=Sign(j,l);
+            S7=Sign(j,m);
+            S8=Sign(k,l);
+            S9=Sign(k,m);
+            S10=Sign(l,m);
+            if ((S1*S2*S3*S4*S5*S6*S7*S8*S9*S10)>0){
+              ep[contp][0]=i; 
+              ep[contp][1]=j;
+              ep[contp][2]=k;
+              ep[contp][3]=l;
+              ep[contp][4]=m;
+              contp++;
+            } else if ((S1*S2*S3*S4*S5*S6*S7*S8*S9*S10)<0){
+              em[contm][0]=i;
+              em[contm][1]=j;
+              em[contm][2]=k;
+              em[contm][3]=l;
+              em[contm][4]=m;
+              contm++;
+	          }
+	        }
+        }
+      }
+    }
+  }
+  //Mapping (i,j) -> A , with i,j=1,...,4 and A=1,...,6
+  int A[Nc][Nc];
+  int cont=0;
+  for (int a=1;a<Nc;a++){
+    for (int b=0;b<a;b++){
+      A[a][b]=cont;
+      A[b][a]=cont;
+      cont++;
+    }
+  }
+} else if (Nc==6){
+  int Nperm=360; //Nc!/2   
+  int ep[Nperm][Nc];
+  int em[Nperm][Nc];
+  int contp=0,contm=0;
+  int S1,S2,S3,S4,S5,S6,S7,S8,S9,S10,S11,S12,S13,S14,S15;
+  for (int i=0;i<Nc;i++){
+    for (int j=0;j<Nc;j++){
+      for (int k=0;k<Nc;k++){
+	      for (int l=0;l<Nc;l++){
+	        for (int m=0;m<Nc;m++){
+	          for (int n=0;n<Nc;n++){
+              S1=Sign(i,j);
+              S2=Sign(i,k);
+              S3=Sign(i,l);
+              S4=Sign(i,m);
+              S5=Sign(i,n);
+              S6=Sign(j,k);
+              S7=Sign(j,l);
+              S8=Sign(j,m);
+              S9=Sign(j,n);
+              S10=Sign(k,l);
+              S11=Sign(k,m);
+              S12=Sign(k,n);
+              S13=Sign(l,m);
+              S14=Sign(l,n);
+              S15=Sign(m,n);
+              if ((S1*S2*S3*S4*S5*S6*S7*S8*S9*S10*S11*S12*S13*S14*S15)>0){
+                ep[contp][0]=i;
+                ep[contp][1]=j;
+                ep[contp][2]=k;
+                ep[contp][3]=l;
+                ep[contp][4]=m;
+                ep[contp][5]=n;
+                contp++;
+              } else if ((S1*S2*S3*S4*S5*S6*S7*S8*S9*S10*S11*S12*S13*S14*S15)<0){
+                em[contm][0]=i;
+                em[contm][1]=j;
+                em[contm][2]=k;
+                em[contm][3]=l;
+                em[contm][4]=m;
+                em[contm][5]=n;
+                contm++;
+	            }
+	          }
+	        }
+	      }
+      }
+    }
+  }
+  //Mapping (i,j) -> A , with i,j=1,...,4 and A=1,...,6
+  int A[Nc][Nc];
+  int cont=0;
+  for (int a=1;a<Nc;a++){
+    for (int b=0;b<a;b++){
+      A[a][b]=cont;
+      A[b][a]=cont;
+      cont++;
+    }
+  }
+}
+*/
+
 
 // Spin Projection J=1/2  
 Ga[0] = Id;
@@ -247,11 +408,26 @@ int count=-1;
  //loop over non-zero permutations     
       for (unsigned int i=0;i<3;i++){
         for (unsigned int j=0;j<3;j++){
-    //positive colours permutations                                                                                                                                           
-          q3_c = peekColour(q3,ep[i][1],ep[j][1]);
-          q1_c = peekColour(q1,ep[i][0],ep[j][0]);
-          q2_c = peekColour(q2,ep[i][2],ep[j][2]);
-          
+    //positive colours permutations              
+          if (Nc==3){                                                                                                                             
+            q3_c = peekColour(q3,ep[i][1],ep[j][1]);                            //Fund
+            q1_c = peekColour(q1,ep[i][0],ep[j][0]);                            //Fund
+            q2_c = peekColour(q2,ep[i][2],ep[j][2]);                            //Fund
+          } else if (Nc==4){
+            q3_c = peekColour(q3,A[ep[i][1]][ep[i][2]],A[ep[j][1]][ep[j][2]]);  //2AS
+            q1_c = peekColour(q1,ep[i][0],ep[j][0]);                            //Fund
+            q2_c = peekColour(q2,ep[i][3],ep[j][3]);                            //Fund
+          } else if (Nc==5){
+            q3_c = peekColour(q3,A[ep[i][1]][ep[i][2]],A[ep[j][1]][ep[j][2]]);  //2AS
+            q1_c = peekColour(q1,ep[i][0],ep[j][0]);                            //Fund
+            q2_c = peekColour(q2,A[ep[i][3]][ep[i][4]],A[ep[j][3]][ep[j][4]]);  //2AS
+          } else if (Nc==6){
+            q3_c = peekColour(q3,A[ep[i][0]][ep[i][1]],A[ep[j][0]][ep[j][1]]);  //2AS
+            q1_c = peekColour(q1,A[ep[i][2]][ep[i][3]],A[ep[j][2]][ep[j][3]]);  //2AS
+            q2_c = peekColour(q2,A[ep[i][4]][ep[i][5]],A[ep[j][4]][ep[j][5]]);  //2AS
+          }
+
+
           NCtrtr += trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c ) * trace( transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
           NCtr += trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
 
@@ -266,9 +442,23 @@ int count=-1;
           LCtr -= trace( q2_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * Gb[iSrc]*transpose(q3_c)*transpose(Gb[iSrc]) );
           q3_c = zero; q1_c = zero; q2_c = zero;
           
-          q3_c = peekColour(q3,em[i][1],em[j][1]);
-          q1_c = peekColour(q1,em[i][0],em[j][0]);
-          q2_c = peekColour(q2,em[i][2],em[j][2]);
+          if (Nc==3){                                                                                                                             
+            q3_c = peekColour(q3,em[i][1],em[j][1]);                            //Fund
+            q1_c = peekColour(q1,em[i][0],em[j][0]);                            //Fund
+            q2_c = peekColour(q2,em[i][2],em[j][2]);                            //Fund
+          } else if (Nc==4){
+            q3_c = peekColour(q3,A[em[i][1]][em[i][2]],A[em[j][1]][em[j][2]]);  //2AS
+            q1_c = peekColour(q1,em[i][0],em[j][0]);                            //Fund
+            q2_c = peekColour(q2,em[i][3],em[j][3]);                            //Fund
+          } else if (Nc==5){
+            q3_c = peekColour(q3,A[em[i][1]][em[i][2]],A[em[j][1]][em[j][2]]);  //2AS
+            q1_c = peekColour(q1,em[i][0],ep[j][0]);                            //Fund
+            q2_c = peekColour(q2,A[ep[i][3]][ep[i][4]],A[ep[j][3]][em[j][4]]);  //2AS
+          } else if (Nc==6){
+            q3_c = peekColour(q3,A[em[i][0]][em[i][1]],A[em[j][0]][em[j][1]]);  //2AS
+            q1_c = peekColour(q1,A[em[i][2]][em[i][3]],A[em[j][2]][em[j][3]]);  //2AS
+            q2_c = peekColour(q2,A[em[i][4]][em[i][5]],A[em[j][4]][em[j][5]]);  //2AS
+          }
 
           NCtrtr += trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c ) * trace( transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
           NCtr += trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
@@ -285,9 +475,23 @@ int count=-1;
           q3_c = zero; q1_c = zero; q2_c = zero;
 
     //negative colours permutations                                                                                                                                           
-          q3_c = peekColour(q3,ep[i][1],em[j][1]);
-          q1_c = peekColour(q1,ep[i][0],em[j][0]);
-          q2_c = peekColour(q2,ep[i][2],em[j][2]);
+          if (Nc==3){                                                                                                                             
+            q3_c = peekColour(q3,ep[i][1],em[j][1]);                            //Fund
+            q1_c = peekColour(q1,ep[i][0],em[j][0]);                            //Fund
+            q2_c = peekColour(q2,ep[i][2],em[j][2]);                            //Fund
+          } else if (Nc==4){
+            q3_c = peekColour(q3,A[ep[i][1]][ep[i][2]],A[em[j][1]][em[j][2]]);  //2AS
+            q1_c = peekColour(q1,ep[i][0],em[j][0]);                            //Fund
+            q2_c = peekColour(q2,ep[i][3],em[j][3]);                            //Fund
+          } else if (Nc==5){
+            q3_c = peekColour(q3,A[ep[i][1]][ep[i][2]],A[em[j][1]][em[j][2]]);  //2AS
+            q1_c = peekColour(q1,ep[i][0],em[j][0]);                            //Fund
+            q2_c = peekColour(q2,A[ep[i][3]][ep[i][4]],A[em[j][3]][em[j][4]]);  //2AS
+          } else if (Nc==6){
+            q3_c = peekColour(q3,A[ep[i][0]][ep[i][1]],A[em[j][0]][em[j][1]]);  //2AS
+            q1_c = peekColour(q1,A[ep[i][2]][ep[i][3]],A[em[j][2]][em[j][3]]);  //2AS
+            q2_c = peekColour(q2,A[ep[i][4]][ep[i][5]],A[em[j][4]][em[j][5]]);  //2AS
+          }
           
           NCtrtr -= trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c ) * trace( transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
           NCtr -= trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
@@ -303,9 +507,23 @@ int count=-1;
           LCtr += trace( q2_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * Gb[iSrc]*transpose(q3_c)*transpose(Gb[iSrc]) );
           q3_c = zero; q1_c = zero; q2_c = zero;
 
-          q3_c = peekColour(q3,em[i][1],ep[j][1]);
-          q1_c = peekColour(q1,em[i][0],ep[j][0]);
-          q2_c = peekColour(q2,em[i][2],ep[j][2]);
+          if (Nc==3){                                                                                                                             
+            q3_c = peekColour(q3,em[i][1],ep[j][1]);                            //Fund
+            q1_c = peekColour(q1,em[i][0],ep[j][0]);                            //Fund
+            q2_c = peekColour(q2,em[i][2],ep[j][2]);                            //Fund
+          } else if (Nc==4){
+            q3_c = peekColour(q3,A[em[i][1]][em[i][2]],A[ep[j][1]][ep[j][2]]);  //2AS
+            q1_c = peekColour(q1,em[i][0],ep[j][0]);                            //Fund
+            q2_c = peekColour(q2,em[i][3],ep[j][3]);                            //Fund
+          } else if (Nc==5){
+            q3_c = peekColour(q3,A[em[i][1]][em[i][2]],A[ep[j][1]][ep[j][2]]);  //2AS
+            q1_c = peekColour(q1,em[i][0],ep[j][0]);                            //Fund
+            q2_c = peekColour(q2,A[em[i][3]][em[i][4]],A[ep[j][3]][ep[j][4]]);  //2AS
+          } else if (Nc==6){
+            q3_c = peekColour(q3,A[em[i][0]][em[i][1]],A[ep[j][0]][ep[j][1]]);  //2AS
+            q1_c = peekColour(q1,A[em[i][2]][em[i][3]],A[ep[j][2]][ep[j][3]]);  //2AS
+            q2_c = peekColour(q2,A[em[i][4]][em[i][5]],A[ep[j][4]][ep[j][5]]);  //2AS
+          }
 
           NCtrtr -= trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c ) * trace( transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
           NCtr -= trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );

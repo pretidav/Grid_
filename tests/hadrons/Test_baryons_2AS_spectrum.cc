@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
 
     MSource::Point::Par ptPar;
     ptPar.position = "0 0 0 0";
-    application.createModule<MSource::Point2AS>("pt", ptPar);
+    application.createModule<MSource::Point>("pt", ptPar);
 
    
     //Sink
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
         // propagators
         MFermion::GaugeProp::Par quarkPar;
         quarkPar.solver = "CG_" + flavour[i];
-        quarkPar.source = "pt2AS";
+        quarkPar.source = "pt";
         application.createModule<MFermion::GaugeProp>("Qpt_" + flavour[i], quarkPar);
 
         //+++++++++++++++++++++++++++++++++
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
         // propagators
         MFermion::GaugeProp2AS::Par quarkPar2S;
         quarkPar2S.solver = "CG2AS_" + flavour[i];
-        quarkPar2S.source = "pt";
+        quarkPar2S.source = "pt2AS";
         application.createModule<MFermion::GaugeProp2AS>("Qpt2AS_" + flavour[i], quarkPar2S);
     }
     for (unsigned int i = 0; i < flavour.size(); ++i)

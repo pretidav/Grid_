@@ -162,8 +162,8 @@ void TBaryon<FImpl1, FImpl2, FImpl3>::execute(void)
    gT= zero;
    gT()(0,2)()=  1;
    gT()(1,3)()=  1;
-   gT()(2,0)()= -1;
-   gT()(3,1)()= -1;
+   gT()(2,0)()=  1;
+   gT()(3,1)()=  1;
    
    g5= zero;
    g5()(0,0)()=  1;

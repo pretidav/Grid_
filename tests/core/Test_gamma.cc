@@ -184,6 +184,20 @@ void checkAdj(const Gamma::Algebra a)
   std::cout << "(= " << Gamma::name[g.g] << ")" << std::endl;
 }
 
+void checkTransp(const Gamma::Algebra a)
+{
+  SpinMatrix gm, testg = transpose(testAlgebra[a]);
+  Gamma      g(transpose(Gamma(a)));
+  bool       pass = true;
+  
+  std::cout << GridLogMessage << "Checking transpose(" << Gamma::name[a] << "): ";
+  gm = 1.0;
+  gm = g*gm;
+  test(gm, testg);
+  std::cout << "(= " << Gamma::name[g.g] << ")" << std::endl;
+}
+
+
 void checkProject(GridSerialRNG &rng)
 {
   SpinVector     rv, recon, full;
@@ -266,6 +280,12 @@ int main(int argc, char *argv[])
   for (int i = 0; i < Gamma::nGamma; ++i)
   {
     checkAdj(i);
+  }  
+  std::cout << GridLogMessage << std::endl;
+  std::cout << GridLogMessage << "======== Transposition check" << std::endl;
+  for (int i = 0; i < Gamma::nGamma; ++i)
+  {
+    checkTransp(i);
   }
   std::cout << GridLogMessage << std::endl;
   std::cout << GridLogMessage << "======== Spin projectors check" << std::endl;

@@ -47,6 +47,7 @@ class Gamma {
     static const std::array<const char *, nGamma>                name;
     static const std::array<std::array<Algebra, nGamma>, nGamma> mul;
     static const std::array<Algebra, nGamma>                     adj;
+    static const std::array<Algebra, nGamma>                     transpose;
     static const std::array<const Gamma, 4>                      gmu;
     Algebra                                                      g;
   public:

@@ -7,7 +7,7 @@ Source file: extras/Hadrons/Modules/MContraction/Baryon.hpp
 Copyright (C) 2015
 Copyright (C) 2016
 
-Author: Antonin Portelli <antonin.portelli@me.com>
+Author: David Preti <david.preti@to.infn.it>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -133,7 +133,7 @@ void TBaryon<FImpl1, FImpl2, FImpl3>::execute(void)
 
    //-------- FIXME with optimized gammas ---------
    // Prepare Spin Matrices
-   SpinMatrix gX, gY, gZ, gT, g5, Cconj, Id, Ga[5], Gb[5], P[2];
+   SpinMatrix gT, Id, P[2]; 
 
    Id= zero;
    RealD unit = 1.0;
@@ -141,38 +141,12 @@ void TBaryon<FImpl1, FImpl2, FImpl3>::execute(void)
      Id()(i,i)()=1;  
    }  
    
-   gX= zero;
-   gX()(0,3)()=  ComplexF(0.0,1.0);
-   gX()(1,2)()=  ComplexF(0.0,1.0);
-   gX()(2,1)()= -ComplexF(0.0,1.0);
-   gX()(3,0)()= -ComplexF(0.0,1.0);
-   
-   gY= zero;
-   gY()(0,3)()= -1;
-   gY()(1,2)()=  1;
-   gY()(2,1)()=  1;
-   gY()(3,0)()= -1;
-   
-   gZ= zero;
-   gZ()(0,2)()=  ComplexF(0.0,1.0);
-   gZ()(1,3)()= -ComplexF(0.0,1.0);
-   gZ()(2,0)()= -ComplexF(0.0,1.0);
-   gZ()(3,1)()=  ComplexF(0.0,1.0);
-   
    gT= zero;
    gT()(0,2)()=  1;
    gT()(1,3)()=  1;
    gT()(2,0)()=  1;
    gT()(3,1)()=  1;
    
-   g5= zero;
-   g5()(0,0)()=  1;
-   g5()(1,1)()=  1;
-   g5()(2,2)()= -1;
-   g5()(3,3)()= -1;
-   
-   Cconj= zero;
-   Cconj=-gT*gY;
 
   //Prepare useful factors 
     RealD four = 4.;
@@ -206,21 +180,26 @@ void TBaryon<FImpl1, FImpl2, FImpl3>::execute(void)
     }
   }
 
-// Spin Projection J=1/2  
-Ga[0] = Id;
-Gb[0] = Cconj * g5;
-Ga[1] = g5;
-Gb[1] = Cconj ;
-Ga[2] = Id;
-Gb[2] = timesI(gT * Cconj * g5);
+//I am considering:  Cconjugation=GammaTGammaY 
 
-// Spin Projection J=3/2
-Ga[3] = Id;
-Gb[3] = Cconj * gX;
-Ga[4] = Id;
-Gb[4] = Cconj * gY;
-Ga[5] = Id;
-Gb[5] = Cconj * gZ;
+Gamma::Algebra Ga [] ={
+    Gamma::Algebra::Identity,
+    Gamma::Algebra::Gamma5,
+    Gamma::Algebra::Identity,
+    Gamma::Algebra::Identity,
+    Gamma::Algebra::Identity,
+    Gamma::Algebra::Identity
+};
+
+Gamma::Algebra Gb [] ={
+    Gamma::Algebra::MinusSigmaXZ,
+    Gamma::Algebra::MinusSigmaYT,
+    Gamma::Algebra::GammaYGamma5, // missing  imag i  (corrected in the contractions)
+    Gamma::Algebra::MinusGammaZGamma5,
+    Gamma::Algebra::GammaT,
+    Gamma::Algebra::GammaXGamma5
+};
+
 
 // Parity Projection 
 P[0] = 0.5 * ( Id + gT );  //Positive Parity Projector
@@ -252,36 +231,37 @@ int count=-1;
           q1_c = peekColour(q1,ep[i][0],ep[j][0]);
           q2_c = peekColour(q2,ep[i][2],ep[j][2]);
           
-          NCtrtr += trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c ) * trace( transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
-          NCtr += trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
+          NCtrtr += trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c ) * trace( transpose(Gamma(Gb[iSrc])*q3_c*transpose(Gamma(Gb[iSrc]))) * q2_c );
 
-          LCtrtr += four * trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q3_c ) * trace( transpose(Gb[iSrc]*q2_c*transpose(Gb[iSrc])) * q1_c );
-          LCtrtr += trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q2_c ) * trace( transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q1_c );
-          LCtrtr += trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c ) * trace( transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
-          LCtr -= two*trace( q3_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * Gb[iSrc]*transpose(q2_c)*Gb[iSrc] );
-          LCtr += two*trace( q2_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q3_c * transpose(Gb[iSrc])*transpose(q1_c)*Gb[iSrc] );
-          LCtr -= two*trace( q1_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q3_c * transpose(Gb[iSrc])*transpose(q2_c)*transpose(Gb[iSrc]) );
-          LCtr += two*trace( q3_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q2_c * transpose(Gb[iSrc])*transpose(q1_c)*Gb[iSrc] );
-          LCtr -= trace( q1_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q2_c * Gb[iSrc]*transpose(q3_c)*transpose(Gb[iSrc]) );
-          LCtr -= trace( q2_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * Gb[iSrc]*transpose(q3_c)*transpose(Gb[iSrc]) );
+          NCtr += trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c * transpose(Gamma(Gb[iSrc])*q3_c*transpose(Gamma(Gb[iSrc]))) * q2_c );
+
+          LCtrtr += four * trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q3_c ) * trace( transpose(Gamma(Gb[iSrc])*q2_c*transpose(Gamma(Gb[iSrc]))) * q1_c );
+          LCtrtr += trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q2_c ) * trace( transpose(Gamma(Gb[iSrc])*q3_c*transpose(Gamma(Gb[iSrc]))) * q1_c );
+          LCtrtr += trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c ) * trace( transpose(Gamma(Gb[iSrc])*q3_c*transpose(Gamma(Gb[iSrc]))) * q2_c );
+          LCtr -= two*trace( q3_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c * Gamma(Gb[iSrc])*transpose(q2_c)*Gamma(Gb[iSrc]) );
+          LCtr += two*trace( q2_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q3_c * transpose(Gamma(Gb[iSrc]))*transpose(q1_c)*Gamma(Gb[iSrc]) );
+          LCtr -= two*trace( q1_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q3_c * transpose(Gamma(Gb[iSrc]))*transpose(q2_c)*transpose(Gamma(Gb[iSrc])) );
+          LCtr += two*trace( q3_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q2_c * transpose(Gamma(Gb[iSrc]))*transpose(q1_c)*Gamma(Gb[iSrc]) );
+          LCtr -= trace( q1_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q2_c * Gamma(Gb[iSrc])*transpose(q3_c)*transpose(Gamma(Gb[iSrc])) );
+          LCtr -= trace( q2_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c * Gamma(Gb[iSrc])*transpose(q3_c)*transpose(Gamma(Gb[iSrc])) );
           q3_c = zero; q1_c = zero; q2_c = zero;
           
           q3_c = peekColour(q3,em[i][1],em[j][1]);
           q1_c = peekColour(q1,em[i][0],em[j][0]);
           q2_c = peekColour(q2,em[i][2],em[j][2]);
 
-          NCtrtr += trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c ) * trace( transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
-          NCtr += trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
+          NCtrtr += trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c ) * trace( transpose(Gamma(Gb[iSrc])*q3_c*transpose(Gamma(Gb[iSrc]))) * q2_c );
+          NCtr += trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c * transpose(Gamma(Gb[iSrc])*q3_c*transpose(Gamma(Gb[iSrc]))) * q2_c );
           
-          LCtrtr += four * trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q3_c ) * trace( transpose(Gb[iSrc]*q2_c*transpose(Gb[iSrc])) * q1_c );
-          LCtrtr += trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q2_c ) * trace( transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q1_c );
-          LCtrtr += trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c ) * trace( transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
-          LCtr -= two*trace( q3_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * Gb[iSrc]*transpose(q2_c)*Gb[iSrc] );
-          LCtr += two*trace( q2_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q3_c * transpose(Gb[iSrc])*transpose(q1_c)*Gb[iSrc] );
-          LCtr -= two*trace( q1_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q3_c * transpose(Gb[iSrc])*transpose(q2_c)*transpose(Gb[iSrc]) );
-          LCtr += two*trace( q3_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q2_c * transpose(Gb[iSrc])*transpose(q1_c)*Gb[iSrc] );
-          LCtr -= trace( q1_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q2_c * Gb[iSrc]*transpose(q3_c)*transpose(Gb[iSrc]) );
-          LCtr -= trace( q2_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * Gb[iSrc]*transpose(q3_c)*transpose(Gb[iSrc]) );
+          LCtrtr += four * trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q3_c ) * trace( transpose(Gamma(Gb[iSrc])*q2_c*transpose(Gamma(Gb[iSrc]))) * q1_c );
+          LCtrtr += trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q2_c ) * trace( transpose(Gamma(Gb[iSrc])*q3_c*transpose(Gamma(Gb[iSrc]))) * q1_c );
+          LCtrtr += trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c ) * trace( transpose(Gamma(Gb[iSrc])*q3_c*transpose(Gamma(Gb[iSrc]))) * q2_c );
+          LCtr -= two*trace( q3_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c * Gamma(Gb[iSrc])*transpose(q2_c)*Gamma(Gb[iSrc]) );
+          LCtr += two*trace( q2_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q3_c * transpose(Gamma(Gb[iSrc]))*transpose(q1_c)*Gamma(Gb[iSrc]) );
+          LCtr -= two*trace( q1_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q3_c * transpose(Gamma(Gb[iSrc]))*transpose(q2_c)*transpose(Gamma(Gb[iSrc])) );
+          LCtr += two*trace( q3_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q2_c * transpose(Gamma(Gb[iSrc]))*transpose(q1_c)*Gamma(Gb[iSrc]) );
+          LCtr -= trace( q1_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q2_c * Gamma(Gb[iSrc])*transpose(q3_c)*transpose(Gamma(Gb[iSrc])) );
+          LCtr -= trace( q2_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c * Gamma(Gb[iSrc])*transpose(q3_c)*transpose(Gamma(Gb[iSrc])) );
           q3_c = zero; q1_c = zero; q2_c = zero;
 
     //negative colours permutations                                                                                                                                           
@@ -289,36 +269,36 @@ int count=-1;
           q1_c = peekColour(q1,ep[i][0],em[j][0]);
           q2_c = peekColour(q2,ep[i][2],em[j][2]);
           
-          NCtrtr -= trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c ) * trace( transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
-          NCtr -= trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
+          NCtrtr -= trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c ) * trace( transpose(Gamma(Gb[iSrc])*q3_c*transpose(Gamma(Gb[iSrc]))) * q2_c );
+          NCtr -= trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c * transpose(Gamma(Gb[iSrc])*q3_c*transpose(Gamma(Gb[iSrc]))) * q2_c );
           
-          LCtrtr -= four * trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q3_c ) * trace( transpose(Gb[iSrc]*q2_c*transpose(Gb[iSrc])) * q1_c );
-          LCtrtr -= trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q2_c ) * trace( transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q1_c );
-          LCtrtr -= trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c ) * trace( transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
-          LCtr += two*trace( q3_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * Gb[iSrc]*transpose(q2_c)*Gb[iSrc] );
-          LCtr -= two*trace( q2_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q3_c * transpose(Gb[iSrc])*transpose(q1_c)*Gb[iSrc] );
-          LCtr += two*trace( q1_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q3_c * transpose(Gb[iSrc])*transpose(q2_c)*transpose(Gb[iSrc]) );
-          LCtr -= two*trace( q3_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q2_c * transpose(Gb[iSrc])*transpose(q1_c)*Gb[iSrc] );
-          LCtr += trace( q1_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q2_c * Gb[iSrc]*transpose(q3_c)*transpose(Gb[iSrc]) );
-          LCtr += trace( q2_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * Gb[iSrc]*transpose(q3_c)*transpose(Gb[iSrc]) );
+          LCtrtr -= four * trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q3_c ) * trace( transpose(Gamma(Gb[iSrc])*q2_c*transpose(Gamma(Gb[iSrc]))) * q1_c );
+          LCtrtr -= trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q2_c ) * trace( transpose(Gamma(Gb[iSrc])*q3_c*transpose(Gamma(Gb[iSrc]))) * q1_c );
+          LCtrtr -= trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c ) * trace( transpose(Gamma(Gb[iSrc])*q3_c*transpose(Gamma(Gb[iSrc]))) * q2_c );
+          LCtr += two*trace( q3_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c * Gamma(Gb[iSrc])*transpose(q2_c)*Gamma(Gb[iSrc]) );
+          LCtr -= two*trace( q2_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q3_c * transpose(Gamma(Gb[iSrc]))*transpose(q1_c)*Gamma(Gb[iSrc]) );
+          LCtr += two*trace( q1_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q3_c * transpose(Gamma(Gb[iSrc]))*transpose(q2_c)*transpose(Gamma(Gb[iSrc])) );
+          LCtr -= two*trace( q3_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q2_c * transpose(Gamma(Gb[iSrc]))*transpose(q1_c)*Gamma(Gb[iSrc]) );
+          LCtr += trace( q1_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q2_c * Gamma(Gb[iSrc])*transpose(q3_c)*transpose(Gamma(Gb[iSrc])) );
+          LCtr += trace( q2_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c * Gamma(Gb[iSrc])*transpose(q3_c)*transpose(Gamma(Gb[iSrc])) );
           q3_c = zero; q1_c = zero; q2_c = zero;
 
           q3_c = peekColour(q3,em[i][1],ep[j][1]);
           q1_c = peekColour(q1,em[i][0],ep[j][0]);
           q2_c = peekColour(q2,em[i][2],ep[j][2]);
 
-          NCtrtr -= trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c ) * trace( transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
-          NCtr -= trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );
+          NCtrtr -= trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c ) * trace( transpose(Gamma(Gb[iSrc])*q3_c*transpose(Gamma(Gb[iSrc]))) * q2_c );
+          NCtr -= trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c * transpose(Gamma(Gb[iSrc])*q3_c*transpose(Gamma(Gb[iSrc]))) * q2_c );
         
-          LCtrtr -= four * trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q3_c ) * trace( transpose(Gb[iSrc]*q2_c*transpose(Gb[iSrc])) * q1_c );
-          LCtrtr -= trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q2_c ) * trace( transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q1_c );
-          LCtrtr -= trace( (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c ) * trace( transpose(Gb[iSrc]*q3_c*transpose(Gb[iSrc])) * q2_c );       
-          LCtr += two*trace( q3_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * Gb[iSrc]*transpose(q2_c)*Gb[iSrc] );
-          LCtr -= two*trace( q2_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q3_c * transpose(Gb[iSrc])*transpose(q1_c)*Gb[iSrc] );
-          LCtr += two*trace( q1_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q3_c * transpose(Gb[iSrc])*transpose(q2_c)*transpose(Gb[iSrc]) );
-          LCtr -= two*trace( q3_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q2_c * transpose(Gb[iSrc])*transpose(q1_c)*Gb[iSrc] );        
-          LCtr += trace( q1_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q2_c * Gb[iSrc]*transpose(q3_c)*transpose(Gb[iSrc]) );
-          LCtr += trace( q2_c * (Ga[iSrc]*P[iParity]*Ga[iSrc]) * q1_c * Gb[iSrc]*transpose(q3_c)*transpose(Gb[iSrc]) );
+          LCtrtr -= four * trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q3_c ) * trace( transpose(Gamma(Gb[iSrc])*q2_c*transpose(Gamma(Gb[iSrc]))) * q1_c );
+          LCtrtr -= trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q2_c ) * trace( transpose(Gamma(Gb[iSrc])*q3_c*transpose(Gamma(Gb[iSrc]))) * q1_c );
+          LCtrtr -= trace( (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c ) * trace( transpose(Gamma(Gb[iSrc])*q3_c*transpose(Gamma(Gb[iSrc]))) * q2_c );       
+          LCtr += two*trace( q3_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c * Gamma(Gb[iSrc])*transpose(q2_c)*Gamma(Gb[iSrc]) );
+          LCtr -= two*trace( q2_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q3_c * transpose(Gamma(Gb[iSrc]))*transpose(q1_c)*Gamma(Gb[iSrc]) );
+          LCtr += two*trace( q1_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q3_c * transpose(Gamma(Gb[iSrc]))*transpose(q2_c)*transpose(Gamma(Gb[iSrc])) );
+          LCtr -= two*trace( q3_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q2_c * transpose(Gamma(Gb[iSrc]))*transpose(q1_c)*Gamma(Gb[iSrc]) );        
+          LCtr += trace( q1_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q2_c * Gamma(Gb[iSrc])*transpose(q3_c)*transpose(Gamma(Gb[iSrc])) );
+          LCtr += trace( q2_c * (Gamma(Ga[iSrc])*P[iParity]*Gamma(Ga[iSrc])) * q1_c * Gamma(Gb[iSrc])*transpose(q3_c)*transpose(Gamma(Gb[iSrc])) );
           q3_c = zero; q1_c = zero; q2_c = zero;
         }
       }
@@ -331,8 +311,14 @@ int count=-1;
       Lresult[count].corr.resize(nt);
 
       for (unsigned int t=0; t<bufN.size(); t++){
+        if (iSrc==2){   //correcting for the missing imag i in the third Gb spin matrix
+        Nresult[count].corr[t] =  -TensorRemove(bufN[t]);
+        Lresult[count].corr[t] =  -TensorRemove(bufL[t]);
+        } else {
         Nresult[count].corr[t] =  TensorRemove(bufN[t]);
         Lresult[count].corr[t] =  TensorRemove(bufL[t]);
+        }
+        
       }
     }
   }

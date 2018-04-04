@@ -1,0 +1,158 @@
+    /*************************************************************************************
+
+    Grid physics library, www.github.com/paboyle/Grid 
+
+    Source file: ./tests/Test_SFGaugeAction.cc
+
+    Copyright (C) 2015
+
+Author: David Preti <david.preti@to.infn.it>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+    See the full license in the file "LICENSE" in the top level distribution directory
+    *************************************************************************************/
+    /*  END LEGAL */
+#include <Grid/Grid.h>
+
+using namespace std;
+using namespace Grid;
+using namespace QCD;
+
+
+int main (int argc, char **argv)
+{
+ Grid_init(&argc, &argv);
+
+  std::vector<int> latt_size = GridDefaultLatt();
+  std::vector<int> simd_layout = GridDefaultSimd(Nd, vComplex::Nsimd());
+  std::vector<int> mpi_layout = GridDefaultMpi();
+  GridCartesian Grid(latt_size, simd_layout, mpi_layout);
+  GridRedBlackCartesian RBGrid(&Grid);
+
+  int threads = GridThread::GetThreads();
+  std::cout << GridLogMessage << "Grid is setup to use " << threads << " threads" << std::endl;
+
+  std::vector<int> seeds({1, 2, 3, 4});
+  GridParallelRNG pRNG(&Grid);
+  pRNG.SeedFixedIntegers(seeds);
+
+  LatticeGaugeField Umu(&Grid);
+  SU3::HotConfiguration(pRNG, Umu);
+  std::vector<LatticeColourMatrix> U(Nd, &Grid);
+
+  //FieldMetaData header;
+  //std::string file("./ckpoint_lat.4000");
+  //NerscIO::readConfiguration(Umu,header,file);
+
+#define NONABELIAN_SF
+int T   = Umu._grid->GlobalDimensions()[3];
+int X   = Umu._grid->GlobalDimensions()[0];
+int Y   = Umu._grid->GlobalDimensions()[1];
+int Z   = Umu._grid->GlobalDimensions()[2];
+std::cout<< "T="<<T<<std::endl;
+std::cout<< "X="<<X<<std::endl;
+std::cout<< "Y="<<Y<<std::endl;
+std::cout<< "Z="<<Z<<std::endl;
+
+assert((X==Y)&&(Y==Z));
+int Tmax=T-1;
+
+#ifdef ABELIAN_SF
+
+//SF boundary implementation:
+std::vector<double> phi_SF(3),phiprime_SF(3),omega(3);
+double eta=0, nuSF=0;
+
+omega[0] = 1;
+omega[1] = -1/2 + nuSF;
+omega[2] = -1/2 - nuSF;
+
+phi_SF[0] = eta*omega[0] - M_PI/3;
+phi_SF[1] = eta*omega[1];
+phi_SF[2] = eta*omega[2] + M_PI/3;
+
+phiprime_SF[0] = -phi_SF[0] - 4/3 * M_PI;
+phiprime_SF[1] = -phi_SF[2] + 2/3 * M_PI;
+phiprime_SF[2] = -phi_SF[1] + 2/3 * M_PI;
+
+LatticeColourMatrix W_bc(Umu._grid),Wprime_bc(Umu._grid);
+
+W_bc=zero;
+Wprime_bc=zero;
+
+
+for (int i = 0; i < Umu._grid->oSites(); i++){
+  W_bc._odata[i]()()(0, 0) = ComplexD(0.0, 1./X)*exp(phi_SF[0]);
+  W_bc._odata[i]()()(1, 1) = ComplexD(0.0, 1./X)*exp(phi_SF[1]);
+  W_bc._odata[i]()()(2, 2) = ComplexD(0.0, 1./X)*exp(phi_SF[2]);
+
+  Wprime_bc._odata[i]()()(0, 0) = ComplexD(0.0, 1./X)*exp(phiprime_SF[0]);
+  Wprime_bc._odata[i]()()(1, 1) = ComplexD(0.0, 1./X)*exp(phiprime_SF[1]);
+  Wprime_bc._odata[i]()()(2, 2) = ComplexD(0.0, 1./X)*exp(phiprime_SF[2]);      
+}
+    
+  for (int mu=0;mu<Nd;mu++){
+    U[mu] = peekLorentz(Umu,mu);
+  }
+  Lattice<iScalar<vInteger>> coor(U[3]._grid);
+  LatticeCoordinate(coor, 3);  
+  U[3] = where(coor==(Tmax), 0.*U[3], U[3]);
+  pokeLorentz(Umu, U[3], 3);
+ 
+  for (int mu=0;mu<Nd-1;mu++){
+    LatticeCoordinate(coor, 3);
+    U[mu] = where(coor==0, W_bc, U[mu]);
+    U[mu] = where(coor==(Tmax), Wprime_bc, U[mu]);
+    pokeLorentz(Umu, U[mu], mu);
+  }
+#endif
+
+
+
+
+#ifdef NONABELIAN_SF
+//SF non-abelian boundary implementation:
+LatticeGaugeField Umu_bc(&Grid);      //input boundary cnfg
+SU3::ColdConfiguration(pRNG,Umu_bc);  //this is something coming from an higher lvl hmc
+std::vector<LatticeColourMatrix> Ubc(Nd, &Grid);
+
+  for (int mu=0;mu<Nd;mu++){
+    U[mu]   = peekLorentz(Umu,mu);
+    Ubc[mu] = peekLorentz(Umu_bc,mu);
+  }
+  Lattice<iScalar<vInteger>> coor(U[3]._grid);
+  LatticeCoordinate(coor, 3);  
+  U[3] = where(coor==(Tmax), 0.*U[3], U[3]);
+  pokeLorentz(Umu, U[3], 3);
+ 
+  for (int mu=0;mu<Nd-1;mu++){
+    LatticeCoordinate(coor, 3);
+    U[mu] = where(coor==0, Ubc[mu], U[mu]);
+    U[mu] = where(coor==(Tmax), Ubc[mu], U[mu]);
+    pokeLorentz(Umu, U[mu], mu);
+  }
+#endif
+
+ 
+
+//NOW ANISOTROPIC GAUGE ACTION
+
+
+  Grid_finalize();
+}
+
+
+

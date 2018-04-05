@@ -93,6 +93,114 @@ private:
 
 
 
+
+
+
+
+////////////////////////////////////////////////////////////////////////
+// Wilson Gauge Action .. should I template the Nc etc..
+////////////////////////////////////////////////////////////////////////
+template <class Gimpl>
+class WilsonGaugeAnisotropicAction : public Action<typename Gimpl::GaugeField> {
+ public:  
+  INHERIT_GIMPL_TYPES(Gimpl);
+
+// Anisotropic bare coupling (Nd betas).
+ private:
+  std::vector<double> vbeta;
+
+
+  /////////////////////////// constructors
+  public:
+   WilsonGaugeAnisotropicAction(std::vector<double> vbeta_):vbeta(vbeta_){};
+
+  virtual std::string action_name() {return "WilsonGaugeAnisotropicAction";}
+
+  virtual std::string LogParameters(){
+    std::stringstream sstream;
+    for (int j=0;j<2;j++){
+    sstream << GridLogMessage << "[WilsonGaugeAnisotropicAction] Beta["<< j <<"]: " << vbeta[j] << std::endl;
+    }
+    return sstream.str();
+  }
+
+  virtual void refresh(const GaugeField &U,
+                       GridParallelRNG &pRNG){};  // noop as no pseudoferms
+
+  virtual RealD S(const GaugeField &U) {
+//    RealD plaq = WilsonLoops<Gimpl>::avgPlaquette(U); //change this!
+
+//modifications
+LatticeColourMatrix tmp(U._grid);
+std::vector<LatticeColourMatrix> Link(Nd, U._grid);
+tmp=zero;
+std::vector<RealD> PlaqDir(2); 
+PlaqDir[0]=0.0;
+PlaqDir[1]=0.0;
+
+for (int mu=0;mu<Nd;mu++){
+  Link[mu] = PeekIndex<LorentzIndex>(U, mu);
+}
+ 
+for (int mu=1;mu<Nd-1;mu++){
+  for (int nu=0;nu<mu;nu++){
+    WilsonLoops<Gimpl>::dirPlaquette(tmp, Link, mu, nu);
+    PlaqDir[0]+=TensorRemove(sum(trace(tmp))).real();
+  }
+}
+
+tmp=zero;
+for (int nu=0;nu<Nd-1;nu++){
+  WilsonLoops<Gimpl>::dirPlaquette(tmp, Link, 3, nu);
+  PlaqDir[1]+=TensorRemove(sum(trace(tmp))).real();
+}
+//end modifications
+int T   = U._grid->GlobalDimensions()[3];
+int X   = U._grid->GlobalDimensions()[0];
+int Y   = U._grid->GlobalDimensions()[1];
+int Z   = U._grid->GlobalDimensions()[2];
+    RealD vol = U._grid->gSites();
+    RealD action = 0;
+    RealD Norm=((Nd-1) * (Nd-2) * vol * Nc / 2 ); 
+    
+    for (int j=0;j<2;j++){
+      if (j==1) vol-=X*Y*Z; 
+      PlaqDir[j]*=1./((Nd-1) * (Nd-2) * vol * Nc / 2 );   
+      action += vbeta[j] * (1.0 - PlaqDir[j]) *  ((Nd-1) * (Nd-2)) * vol * 0.5 ;
+      std::cout<< "PlaqDir=" << PlaqDir[j]<<std::endl;
+      std::cout<< "action="  << action <<std::endl;
+    }
+
+    return action;
+  };
+
+  virtual void deriv(const GaugeField &U, GaugeField &dSdU) {
+    // not optimal implementation FIXME
+    // extend Ta to include Lorentz indexes
+
+    RealD factor;
+ 
+    GaugeLinkField dSdU_mu(U._grid);
+    for (int mu = 0; mu < Nd; mu++) {
+    factor = 0.5 * vbeta[mu] / RealD(Nc);
+  
+  
+      WilsonLoops<Gimpl>::StapleMult(dSdU_mu, U, mu); 
+      dSdU_mu = Ta(dSdU_mu) * factor;
+      
+      int isDirichlet = 0;
+      if (isDirichlet){
+      Lattice<iScalar<vInteger>> coor(dSdU_mu._grid);
+      LatticeCoordinate(coor, 3);
+      int Tmax = dSdU_mu._grid->GlobalDimensions()[3]-1;
+      dSdU_mu = where((coor==(Tmax-1) || coor==0), 0.*dSdU_mu, dSdU_mu);
+      PokeIndex<LorentzIndex>(dSdU, dSdU_mu, mu);
+      }
+  }}
+private:
+  RealD beta;  
+};
+
 }
 }
 

@@ -50,7 +50,7 @@ int main (int argc, char **argv)
   pRNG.SeedFixedIntegers(seeds);
 
   LatticeGaugeField Umu(&Grid);
-  SU3::HotConfiguration(pRNG, Umu);
+  SU3::ColdConfiguration(pRNG, Umu);
   std::vector<LatticeColourMatrix> U(Nd, &Grid);
 
   //FieldMetaData header;
@@ -62,10 +62,7 @@ int T   = Umu._grid->GlobalDimensions()[3];
 int X   = Umu._grid->GlobalDimensions()[0];
 int Y   = Umu._grid->GlobalDimensions()[1];
 int Z   = Umu._grid->GlobalDimensions()[2];
-std::cout<< "T="<<T<<std::endl;
-std::cout<< "X="<<X<<std::endl;
-std::cout<< "Y="<<Y<<std::endl;
-std::cout<< "Z="<<Z<<std::endl;
+std::cout << GridLogMessage << "XxYxZxT="<<X<<"x"<<Y<<"x"<<Z<<"x"<<T<<std::endl;
 
 assert((X==Y)&&(Y==Z));
 int Tmax=T-1;
@@ -144,12 +141,30 @@ std::vector<LatticeColourMatrix> Ubc(Nd, &Grid);
     U[mu] = where(coor==(Tmax), Ubc[mu], U[mu]);
     pokeLorentz(Umu, U[mu], mu);
   }
+  
+  std::cout << U[2] << std::endl;
 #endif
 
  
 
 //NOW ANISOTROPIC GAUGE ACTION
+std::vector<double> beta={1.0,1.0};
+WilsonGaugeAnisotropicActionR Action(beta);
+std::cout<< Action.LogParameters() << std::endl;
 
+RealD S;
+S=Action.S(Umu);
+std::cout << GridLogMessage << "S= " << S << std::endl;
+
+
+
+
+WilsonGaugeActionR Action2(1.0);
+std::cout<< Action2.LogParameters() << std::endl;
+
+RealD S2;
+S2=Action2.S(Umu);
+std::cout << GridLogMessage << "S= " << S2 << std::endl;
 
   Grid_finalize();
 }

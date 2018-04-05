@@ -57,7 +57,7 @@ int main (int argc, char **argv)
   //std::string file("./ckpoint_lat.4000");
   //NerscIO::readConfiguration(Umu,header,file);
 
-#define NONABELIAN_SF
+#define ABELIAN_SF
 int T   = Umu._grid->GlobalDimensions()[3];
 int X   = Umu._grid->GlobalDimensions()[0];
 int Y   = Umu._grid->GlobalDimensions()[1];
@@ -92,13 +92,13 @@ Wprime_bc=zero;
 
 
 for (int i = 0; i < Umu._grid->oSites(); i++){
-  W_bc._odata[i]()()(0, 0) = ComplexD(0.0, 1./X)*exp(phi_SF[0]);
-  W_bc._odata[i]()()(1, 1) = ComplexD(0.0, 1./X)*exp(phi_SF[1]);
-  W_bc._odata[i]()()(2, 2) = ComplexD(0.0, 1./X)*exp(phi_SF[2]);
+  W_bc._odata[i]()()(0, 0) = exp(ComplexD(0.0, 1./X)*phi_SF[0]);
+  W_bc._odata[i]()()(1, 1) = exp(ComplexD(0.0, 1./X)*phi_SF[1]);
+  W_bc._odata[i]()()(2, 2) = exp(ComplexD(0.0, 1./X)*phi_SF[2]);
 
-  Wprime_bc._odata[i]()()(0, 0) = ComplexD(0.0, 1./X)*exp(phiprime_SF[0]);
-  Wprime_bc._odata[i]()()(1, 1) = ComplexD(0.0, 1./X)*exp(phiprime_SF[1]);
-  Wprime_bc._odata[i]()()(2, 2) = ComplexD(0.0, 1./X)*exp(phiprime_SF[2]);      
+  Wprime_bc._odata[i]()()(0, 0) = exp(ComplexD(0.0, 1./X)*phiprime_SF[0]);
+  Wprime_bc._odata[i]()()(1, 1) = exp(ComplexD(0.0, 1./X)*phiprime_SF[1]);
+  Wprime_bc._odata[i]()()(2, 2) = exp(ComplexD(0.0, 1./X)*phiprime_SF[2]);      
 }
     
   for (int mu=0;mu<Nd;mu++){
@@ -123,7 +123,7 @@ for (int i = 0; i < Umu._grid->oSites(); i++){
 #ifdef NONABELIAN_SF
 //SF non-abelian boundary implementation:
 LatticeGaugeField Umu_bc(&Grid);      //input boundary cnfg
-SU3::ColdConfiguration(pRNG,Umu_bc);  //this is something coming from an higher lvl hmc
+SU3::ColdConfiguration(pRNG,Umu_bc);   //this is something coming from an higher lvl hmc
 std::vector<LatticeColourMatrix> Ubc(Nd, &Grid);
 
   for (int mu=0;mu<Nd;mu++){
@@ -142,14 +142,16 @@ std::vector<LatticeColourMatrix> Ubc(Nd, &Grid);
     pokeLorentz(Umu, U[mu], mu);
   }
   
-  std::cout << U[2] << std::endl;
+ // std::cout << U[2] << std::endl;
 #endif
 
  
 
 //NOW ANISOTROPIC GAUGE ACTION
 std::vector<double> beta={1.0,1.0};
-WilsonGaugeAnisotropicActionR Action(beta);
+RealD ct=1.0,cs=1.0;
+
+WilsonGaugeAnisotropicActionR Action(beta,cs,ct);
 std::cout<< Action.LogParameters() << std::endl;
 
 RealD S;

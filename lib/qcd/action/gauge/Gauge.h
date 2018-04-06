@@ -64,9 +64,9 @@ typedef SymanzikGaugeAction<ConjugateGimplR>        ConjugateSymanzikGaugeAction
 typedef SymanzikGaugeAction<ConjugateGimplF>        ConjugateSymanzikGaugeActionF;
 typedef SymanzikGaugeAction<ConjugateGimplD>        ConjugateSymanzikGaugeActionD;
 
-typedef WilsonGaugeAnisotropicAction<PeriodicGimplR>          WilsonGaugeAnisotropicActionR;
-typedef WilsonGaugeAnisotropicAction<PeriodicGimplF>          WilsonGaugeAnisotropicActionF;
-typedef WilsonGaugeAnisotropicAction<PeriodicGimplD>          WilsonGaugeAnisotropicActionD;
+typedef WilsonGaugeSFAction<PeriodicGimplR>          WilsonGaugeSFActionR;
+typedef WilsonGaugeSFAction<PeriodicGimplF>          WilsonGaugeSFActionF;
+typedef WilsonGaugeSFAction<PeriodicGimplD>          WilsonGaugeSFActionD;
 
 }}
 

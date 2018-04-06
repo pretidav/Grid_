@@ -57,7 +57,7 @@ int main (int argc, char **argv)
   //std::string file("./ckpoint_lat.4000");
   //NerscIO::readConfiguration(Umu,header,file);
 
-#define ABELIAN_SF
+#define NONABELIAN_SF
 int T   = Umu._grid->GlobalDimensions()[3];
 int X   = Umu._grid->GlobalDimensions()[0];
 int Y   = Umu._grid->GlobalDimensions()[1];
@@ -151,7 +151,7 @@ std::vector<LatticeColourMatrix> Ubc(Nd, &Grid);
 std::vector<double> beta={1.0,1.0};
 RealD ct=1.0,cs=1.0;
 
-WilsonGaugeAnisotropicActionR Action(beta,cs,ct);
+WilsonGaugeSFActionR Action(beta,cs,ct);
 std::cout<< Action.LogParameters() << std::endl;
 
 RealD S;
@@ -167,6 +167,13 @@ std::cout<< Action2.LogParameters() << std::endl;
 RealD S2;
 S2=Action2.S(Umu);
 std::cout << GridLogMessage << "S= " << S2 << std::endl;
+
+
+
+//test UPDATE
+
+
+
 
   Grid_finalize();
 }

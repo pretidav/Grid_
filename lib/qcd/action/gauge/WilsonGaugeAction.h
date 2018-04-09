@@ -206,8 +206,8 @@ RealD NORM;
     }
 
     staple = zero;    
-    factor[0] = 0.5 * vbeta[0] / RealD(Nc);
-    factor[1] = 0.5 * vbeta[1] / RealD(Nc);
+    factor[0] =  vbeta[0] / RealD(Nc)*0.5;
+    factor[1] =  vbeta[1] / RealD(Nc)*0.5;
     
     Lattice<iScalar<vInteger>> coorStaple(staple._grid);
     LatticeCoordinate(coorStaple, 3);
@@ -222,7 +222,6 @@ RealD NORM;
         if (nu==3){ 
           staple += tmp1* adj(U_mu[nu]*tmp2)*factor[1];
           staple = where((coorStaple==Time-2), ct_SF*staple, staple);
-          std::cout << "ciao" << std::endl; 
         } else {
           staple += tmp1* adj(U_mu[nu]*tmp2)*factor[0];
          }
@@ -255,7 +254,7 @@ RealD NORM;
   LatticeCoordinate(coor, 3);
   int T = dSdU_mu[3]._grid->GlobalDimensions()[3];
   for (int mu=0;mu<Nd;mu++){
-    dSdU_mu[mu] = where((coor==0 || coor==T-1), 0.*dSdU_mu[mu], dSdU_mu[mu]); 
+    dSdU_mu[mu] = where((coor==0 || coor==T-1), 0.*dSdU_mu[mu], dSdU_mu[mu]); //this have to be commented o check the force.
     PokeIndex<LorentzIndex>(dSdU, dSdU_mu[mu], mu);
   }
  }

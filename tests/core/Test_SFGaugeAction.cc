@@ -123,7 +123,7 @@ for (int i = 0; i < Umu._grid->oSites(); i++){
 #ifdef NONABELIAN_SF
 //SF non-abelian boundary implementation:
 LatticeGaugeField Umu_bc(&Grid);      //input boundary cnfg
-SU3::ColdConfiguration(pRNG,Umu_bc);   //this is something coming from an higher lvl hmc
+SU3::HotConfiguration(pRNG,Umu_bc);   //this is something coming from an higher lvl hmc
 std::vector<LatticeColourMatrix> Ubc(Nd, &Grid);
 
   for (int mu=0;mu<Nd;mu++){
@@ -146,6 +146,8 @@ std::vector<LatticeColourMatrix> Ubc(Nd, &Grid);
 #endif
 
  
+//-----------
+//     TEST Action: 
 
 //NOW ANISOTROPIC GAUGE ACTION
 std::vector<double> beta={1.0,1.0};
@@ -165,12 +167,14 @@ S2=Action2.S(Umu);
 std::cout << GridLogMessage << "S_Wilson_periodic= " << S2 << std::endl;
 
 
+//-----------
+//     TEST dSdU: 
 
-//test Force ANISOTROPIC ACTION
+// ANISOTROPIC ACTION
 LatticeGaugeField dSdU(&Grid);   
 Action.deriv(Umu, dSdU); 
 
-//test Force WILSON PLAQUETTE ACTION
+// WILSON PLAQUETTE ACTION
 LatticeGaugeField dSdU2(&Grid);   
 Action2.deriv(Umu, dSdU2); 
 
@@ -179,11 +183,59 @@ LatticeColourMatrix diff(&Grid);
 for (int i=0;i<Nd;i++){
 dSdU_mu   = peekLorentz(dSdU,i);
 dSdU2_mu  = peekLorentz(dSdU2,i);
-std::cout << "dSdU_SF[" << i <<"]:" << dSdU_mu << std::endl;
-std::cout << "dSdU_Wilson[" << i <<"]:" << dSdU2_mu << std::endl;
+//std::cout << "dSdU_SF[" << i <<"]:" << dSdU_mu << std::endl;
+//std::cout << "dSdU_Wilson[" << i <<"]:" << dSdU2_mu << std::endl;
 diff=dSdU_mu-dSdU2_mu;
-std::cout << GridLogMessage << "DIFF[" << i << "]= " << diff << std::endl;
+//std::cout << GridLogMessage << "DIFF[" << i << "]= " << diff << std::endl;
 }
+
+  ////////////////////////////////////
+  // Modify the gauge field a little 
+  ////////////////////////////////////
+  RealD dt = 0.000001;
+
+  LatticeColourMatrix mommu(&Grid); 
+  LatticeColourMatrix forcemu(&Grid); 
+  LatticeGaugeField mom(&Grid); 
+  LatticeGaugeField Uprime(&Grid); 
+
+  for(int mu=0;mu<Nd;mu++){
+    SU3::GaussianFundamentalLieAlgebraMatrix(pRNG, mommu); // Traceless antihermitian momentum; gaussian in lie alg
+    PokeIndex<LorentzIndex>(mom,mommu,mu);
+    // fourth order exponential approx
+    parallel_for(auto i=mom.begin();i<mom.end();i++){ // exp(pmu dt) * Umu
+      Uprime[i](mu) = Umu[i](mu) + mom[i](mu)*Umu[i](mu)*dt ;
+    }
+  }
+  ComplexD Sprime    = Action.S(Uprime);
+
+  //////////////////////////////////////////////
+  // Use derivative to estimate dS
+  //////////////////////////////////////////////
+  LatticeGaugeField UdSdU(&Grid);
+  Action.deriv(Umu,UdSdU);
+  LatticeComplex dS(&Grid); dS = zero;
+
+  for(int mu=0;mu<Nd;mu++){
+    auto UdSdUmu = PeekIndex<LorentzIndex>(UdSdU,mu);
+         mommu   = PeekIndex<LorentzIndex>(mom,mu);
+    // Update gauge action density
+    // U = exp(p dt) U
+    // dU/dt = p U
+    // so dSdt = trace( dUdt dSdU) = trace( p UdSdUmu ) 
+    dS = dS - trace(mommu*UdSdUmu)*dt*2.0;
+  }
+  ComplexD dSpred    = sum(dS);
+
+  std::cout << GridLogMessage << " S      "<<S<<std::endl;
+  std::cout << GridLogMessage << " Sprime "<<Sprime<<std::endl;
+  std::cout << GridLogMessage << "dS      "<<Sprime-S<<std::endl;
+  std::cout << GridLogMessage << "pred dS "<< dSpred <<std::endl;
+
+  assert( fabs(real(Sprime-S-dSpred)) < 1.0e-2 ) ;
+
+  std::cout<< GridLogMessage << "Done" <<std::endl;
+
   Grid_finalize();
 }
 

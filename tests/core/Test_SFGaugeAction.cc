@@ -50,7 +50,7 @@ int main (int argc, char **argv)
   pRNG.SeedFixedIntegers(seeds);
 
   LatticeGaugeField Umu(&Grid);
-  SU3::ColdConfiguration(pRNG, Umu);
+  SU3::HotConfiguration(pRNG, Umu);
   std::vector<LatticeColourMatrix> U(Nd, &Grid);
 
   //FieldMetaData header;
@@ -153,28 +153,37 @@ RealD ct=1.0,cs=1.0;
 
 WilsonGaugeSFActionR Action(beta,cs,ct);
 std::cout<< Action.LogParameters() << std::endl;
-
 RealD S;
 S=Action.S(Umu);
-std::cout << GridLogMessage << "S= " << S << std::endl;
+std::cout << GridLogMessage << "S_Wilson_SF= " << S << std::endl;
 
-
-
-
+//WILSON PLAQUETTE ACTION
 WilsonGaugeActionR Action2(1.0);
 std::cout<< Action2.LogParameters() << std::endl;
-
 RealD S2;
 S2=Action2.S(Umu);
-std::cout << GridLogMessage << "S= " << S2 << std::endl;
+std::cout << GridLogMessage << "S_Wilson_periodic= " << S2 << std::endl;
 
 
 
-//test UPDATE
+//test Force ANISOTROPIC ACTION
+LatticeGaugeField dSdU(&Grid);   
+Action.deriv(Umu, dSdU); 
 
+//test Force WILSON PLAQUETTE ACTION
+LatticeGaugeField dSdU2(&Grid);   
+Action2.deriv(Umu, dSdU2); 
 
-
-
+LatticeColourMatrix dSdU_mu(&Grid), dSdU2_mu(&Grid);
+LatticeColourMatrix diff(&Grid);
+for (int i=0;i<Nd;i++){
+dSdU_mu   = peekLorentz(dSdU,i);
+dSdU2_mu  = peekLorentz(dSdU2,i);
+std::cout << "dSdU_SF[" << i <<"]:" << dSdU_mu << std::endl;
+std::cout << "dSdU_Wilson[" << i <<"]:" << dSdU2_mu << std::endl;
+diff=dSdU_mu-dSdU2_mu;
+std::cout << GridLogMessage << "DIFF[" << i << "]= " << diff << std::endl;
+}
   Grid_finalize();
 }
 

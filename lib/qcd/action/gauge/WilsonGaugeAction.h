@@ -194,28 +194,73 @@ RealD NORM;
 };
 
   virtual void deriv(const GaugeField &U, GaugeField &dSdU) {
-    // not optimal implementation FIXME
-    // extend Ta to include Lorentz indexes
 
-    RealD factor;
-    GaugeLinkField dSdU_mu(U._grid);
+    std::vector<RealD> factor(2);
+    std::vector<LatticeColourMatrix> dSdU_mu(Nd, U._grid);
+    std::vector<LatticeColourMatrix> U_mu(Nd, U._grid);
+    LatticeColourMatrix staple(U._grid);
+    LatticeColourMatrix tmp1(U._grid),tmp2(U._grid);
+
     for (int mu = 0; mu < Nd; mu++) {
-    factor = 0.5 * vbeta[mu] / RealD(Nc);
+      U_mu[mu] = PeekIndex<LorentzIndex>(U, mu);
+    }
+
+    staple = zero;    
+    factor[0] = 0.5 * vbeta[0] / RealD(Nc);
+    factor[1] = 0.5 * vbeta[1] / RealD(Nc);
     
-      WilsonLoops<Gimpl>::StapleMult(dSdU_mu, U, mu); 
-      dSdU_mu = Ta(dSdU_mu) * factor;
-      
-      int isDirichlet = 0;
-      if (isDirichlet){
-      Lattice<iScalar<vInteger>> coor(dSdU_mu._grid);
-      LatticeCoordinate(coor, 3);
-      int Tmax = dSdU_mu._grid->GlobalDimensions()[3]-1;
-      dSdU_mu = where((coor==(Tmax-1) || coor==0), 0.*dSdU_mu, dSdU_mu);
-      PokeIndex<LorentzIndex>(dSdU, dSdU_mu, mu);
+    Lattice<iScalar<vInteger>> coorStaple(staple._grid);
+    LatticeCoordinate(coorStaple, 3);
+    int Time = staple._grid->GlobalDimensions()[3];
+
+ for (int mu=0;mu<Nd-1;mu++){
+   staple=zero;
+  for (int nu=0; nu<Nd; nu++) {
+      if (nu != mu) {
+        tmp1 = Cshift(U_mu[nu], mu, 1);
+        tmp2 = Cshift(U_mu[mu], nu, 1);
+        if (nu==3){ 
+          staple += tmp1* adj(U_mu[nu]*tmp2)*factor[1];
+          staple = where((coorStaple==Time-2), ct_SF*staple, staple);
+          std::cout << "ciao" << std::endl; 
+        } else {
+          staple += tmp1* adj(U_mu[nu]*tmp2)*factor[0];
+         }
+        tmp2 = adj(U_mu[mu]*tmp1)*U_mu[nu];
+        if (nu==3){
+        staple += Cshift(tmp2, nu, -1)*factor[1];
+        staple = where((coorStaple==1), ct_SF*staple, staple);
+        } else {
+        staple += Cshift(tmp2, nu, -1)*factor[0];
+        }
       }
-  }}
-private:
-  RealD beta;  
+  }
+  dSdU_mu[mu] = U_mu[mu]*staple;
+  dSdU_mu[mu] = Ta(dSdU_mu[mu]);
+ }
+
+  staple=zero;
+  for (int nu=0;nu<Nd-1;nu++){
+    tmp1 = Cshift(U_mu[nu], 3, 1);
+    tmp2 = Cshift(U_mu[3], nu, 1);
+    staple += tmp1* adj(U_mu[nu]*tmp2);
+    tmp2 = adj(U_mu[3]*tmp1)*U_mu[nu];
+    staple += Cshift(tmp2, nu, -1);
+  }
+  staple = where((coorStaple==0 || coorStaple==Time-2), ct_SF*staple, staple); //only T-2 slice is relevant here.
+  dSdU_mu[3] = U_mu[3]*staple;
+  dSdU_mu[3] = Ta(dSdU_mu[3]) * factor[1];  //all those staples carry beta[1] 
+  
+  Lattice<iScalar<vInteger>> coor(dSdU_mu[3]._grid);
+  LatticeCoordinate(coor, 3);
+  int T = dSdU_mu[3]._grid->GlobalDimensions()[3];
+  for (int mu=0;mu<Nd;mu++){
+    dSdU_mu[mu] = where((coor==0 || coor==T-1), 0.*dSdU_mu[mu], dSdU_mu[mu]); 
+    PokeIndex<LorentzIndex>(dSdU, dSdU_mu[mu], mu);
+  }
+ }
+//private:
+//  RealD beta;  
 };
 
 }

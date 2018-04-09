@@ -6,7 +6,7 @@
 
     Copyright (C) 2015
 
-Author: David Preti <david.preti@to.infn.it>
+    Author: David Preti <david.preti@to.infn.it>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

@@ -758,6 +758,325 @@ template<typename GaugeField,typename GaugeMat>
     }
   }
 
+
+
+
+
+//=============================================
+//=============================================
+// SF Gauge boundaries from " f a luscher and t renormalizable probe "
+
+  template <typename GaugeField>
+  static void HotConfigurationSF(GridParallelRNG &pRNG, GaugeField &out, double eta=0, double nuSF=0) {
+    typedef typename GaugeField::vector_type vector_type;
+    typedef iSUnMatrix<vector_type> vMatrixType;
+    typedef Lattice<vMatrixType> LatticeMatrixType;
+
+    LatticeMatrixType Umu(out._grid);
+    for (int mu = 0; mu < Nd; mu++) {
+      LieRandomize(pRNG, Umu, 1.0);
+      PokeIndex<LorentzIndex>(out, Umu, mu);
+    }
+
+    int T   = out._grid->GlobalDimensions()[3];
+    int X   = out._grid->GlobalDimensions()[0];
+    int Y   = out._grid->GlobalDimensions()[1];
+    int Z   = out._grid->GlobalDimensions()[2];
+    //std::cout << GridLogMessage << "XxYxZxT="<<X<<"x"<<Y<<"x"<<Z<<"x"<<T<<std::endl;
+    assert((X==Y)&&(Y==Z));
+    int Tmax=T-1;
+
+    std::vector<double> phi_SF(3),phiprime_SF(3),omega(3);
+    LatticeColourMatrix W_bc(out._grid),Wprime_bc(out._grid);
+    W_bc=zero;
+    Wprime_bc=zero;
+
+    omega[0] = 1;
+    omega[1] = -1/2 + nuSF;
+    omega[2] = -1/2 - nuSF;
+    phi_SF[0] = eta*omega[0] - M_PI/3;
+    phi_SF[1] = eta*omega[1];
+    phi_SF[2] = eta*omega[2] + M_PI/3;
+    phiprime_SF[0] = -phi_SF[0] - 4/3 * M_PI;
+    phiprime_SF[1] = -phi_SF[2] + 2/3 * M_PI;
+    phiprime_SF[2] = -phi_SF[1] + 2/3 * M_PI;   
+
+    for (int i = 0; i < out._grid->oSites(); i++){
+      W_bc._odata[i]()()(0, 0) = exp(ComplexD(0.0, 1./X)*phi_SF[0]);
+      W_bc._odata[i]()()(1, 1) = exp(ComplexD(0.0, 1./X)*phi_SF[1]);
+      W_bc._odata[i]()()(2, 2) = exp(ComplexD(0.0, 1./X)*phi_SF[2]);
+      Wprime_bc._odata[i]()()(0, 0) = exp(ComplexD(0.0, 1./X)*phiprime_SF[0]);
+      Wprime_bc._odata[i]()()(1, 1) = exp(ComplexD(0.0, 1./X)*phiprime_SF[1]);
+      Wprime_bc._odata[i]()()(2, 2) = exp(ComplexD(0.0, 1./X)*phiprime_SF[2]);      
+    }
+    
+    std::vector<LatticeColourMatrix> U(Nd, out._grid);
+    for (int mu=0;mu<Nd;mu++){
+      U[mu] = peekLorentz(out,mu);
+    }
+    Lattice<iScalar<vInteger>> coor(U[3]._grid);
+    LatticeCoordinate(coor, 3);  
+    U[3] = where(coor==(Tmax), 0.*U[3], U[3]);
+    pokeLorentz(out, U[3], 3);
+    for (int mu=0;mu<Nd-1;mu++){
+      LatticeCoordinate(coor, 3);
+      U[mu] = where(coor==0, W_bc, U[mu]);
+      U[mu] = where(coor==(Tmax), Wprime_bc, U[mu]);
+      pokeLorentz(out, U[mu], mu);
+    }
+  }
+
+
+  template<typename GaugeField>
+  static void TepidConfigurationSF(GridParallelRNG &pRNG,GaugeField &out, double eta=0, double nuSF=0){
+    typedef typename GaugeField::vector_type vector_type;
+    typedef iSUnMatrix<vector_type> vMatrixType;
+    typedef Lattice<vMatrixType> LatticeMatrixType;
+
+    LatticeMatrixType Umu(out._grid);
+    for(int mu=0;mu<Nd;mu++){
+      LieRandomize(pRNG,Umu,0.01);
+      PokeIndex<LorentzIndex>(out,Umu,mu);
+    }
+    int T   = out._grid->GlobalDimensions()[3];
+    int X   = out._grid->GlobalDimensions()[0];
+    int Y   = out._grid->GlobalDimensions()[1];
+    int Z   = out._grid->GlobalDimensions()[2];
+    //std::cout << GridLogMessage << "XxYxZxT="<<X<<"x"<<Y<<"x"<<Z<<"x"<<T<<std::endl;
+    assert((X==Y)&&(Y==Z));
+    int Tmax=T-1;
+
+    std::vector<double> phi_SF(3),phiprime_SF(3),omega(3);
+    LatticeColourMatrix W_bc(out._grid),Wprime_bc(out._grid);
+    W_bc=zero;
+    Wprime_bc=zero;
+
+    omega[0] = 1;
+    omega[1] = -1/2 + nuSF;
+    omega[2] = -1/2 - nuSF;
+    phi_SF[0] = eta*omega[0] - M_PI/3;
+    phi_SF[1] = eta*omega[1];
+    phi_SF[2] = eta*omega[2] + M_PI/3;
+    phiprime_SF[0] = -phi_SF[0] - 4/3 * M_PI;
+    phiprime_SF[1] = -phi_SF[2] + 2/3 * M_PI;
+    phiprime_SF[2] = -phi_SF[1] + 2/3 * M_PI;   
+
+    for (int i = 0; i < out._grid->oSites(); i++){
+      W_bc._odata[i]()()(0, 0) = exp(ComplexD(0.0, 1./X)*phi_SF[0]);
+      W_bc._odata[i]()()(1, 1) = exp(ComplexD(0.0, 1./X)*phi_SF[1]);
+      W_bc._odata[i]()()(2, 2) = exp(ComplexD(0.0, 1./X)*phi_SF[2]);
+
+      Wprime_bc._odata[i]()()(0, 0) = exp(ComplexD(0.0, 1./X)*phiprime_SF[0]);
+      Wprime_bc._odata[i]()()(1, 1) = exp(ComplexD(0.0, 1./X)*phiprime_SF[1]);
+      Wprime_bc._odata[i]()()(2, 2) = exp(ComplexD(0.0, 1./X)*phiprime_SF[2]);      
+    }
+    std::vector<LatticeColourMatrix> U(Nd, out._grid);
+    for (int mu=0;mu<Nd;mu++){
+      U[mu] = peekLorentz(out,mu);
+    }
+    Lattice<iScalar<vInteger>> coor(U[3]._grid);
+    LatticeCoordinate(coor, 3);  
+    U[3] = where(coor==(Tmax), 0.*U[3], U[3]);
+    pokeLorentz(out, U[3], 3);
+    for (int mu=0;mu<Nd-1;mu++){
+      LatticeCoordinate(coor, 3);
+      U[mu] = where(coor==0, W_bc, U[mu]);
+      U[mu] = where(coor==(Tmax), Wprime_bc, U[mu]);
+      pokeLorentz(out, U[mu], mu);
+    }
+  }
+
+  template<typename GaugeField>
+  static void ColdConfigurationSF(GridParallelRNG &pRNG,GaugeField &out, double eta=0, double nuSF=0){
+    typedef typename GaugeField::vector_type vector_type;
+    typedef iSUnMatrix<vector_type> vMatrixType;
+    typedef Lattice<vMatrixType> LatticeMatrixType;
+
+    LatticeMatrixType Umu(out._grid);
+    Umu=1.0;
+    for(int mu=0;mu<Nd;mu++){
+      PokeIndex<LorentzIndex>(out,Umu,mu);
+    }
+
+    int T   = out._grid->GlobalDimensions()[3];
+    int X   = out._grid->GlobalDimensions()[0];
+    int Y   = out._grid->GlobalDimensions()[1];
+    int Z   = out._grid->GlobalDimensions()[2];
+    //std::cout << GridLogMessage << "XxYxZxT="<<X<<"x"<<Y<<"x"<<Z<<"x"<<T<<std::endl;
+    assert((X==Y)&&(Y==Z));
+    int Tmax=T-1;
+
+    std::vector<double> phi_SF(3),phiprime_SF(3),omega(3);
+    LatticeColourMatrix W_bc(out._grid),Wprime_bc(out._grid);
+    W_bc=zero;
+    Wprime_bc=zero;
+
+    omega[0] = 1;
+    omega[1] = -1/2 + nuSF;
+    omega[2] = -1/2 - nuSF;
+
+    phi_SF[0] = eta*omega[0] - M_PI/3;
+    phi_SF[1] = eta*omega[1];
+    phi_SF[2] = eta*omega[2] + M_PI/3;
+    phiprime_SF[0] = -phi_SF[0] - 4/3 * M_PI;
+    phiprime_SF[1] = -phi_SF[2] + 2/3 * M_PI;
+    phiprime_SF[2] = -phi_SF[1] + 2/3 * M_PI;   
+
+    for (int i = 0; i < out._grid->oSites(); i++){
+      W_bc._odata[i]()()(0, 0) = exp(ComplexD(0.0, 1./X)*phi_SF[0]);
+      W_bc._odata[i]()()(1, 1) = exp(ComplexD(0.0, 1./X)*phi_SF[1]);
+      W_bc._odata[i]()()(2, 2) = exp(ComplexD(0.0, 1./X)*phi_SF[2]);
+
+      Wprime_bc._odata[i]()()(0, 0) = exp(ComplexD(0.0, 1./X)*phiprime_SF[0]);
+      Wprime_bc._odata[i]()()(1, 1) = exp(ComplexD(0.0, 1./X)*phiprime_SF[1]);
+      Wprime_bc._odata[i]()()(2, 2) = exp(ComplexD(0.0, 1./X)*phiprime_SF[2]);      
+    }
+    
+    std::vector<LatticeColourMatrix> U(Nd, out._grid);
+    for (int mu=0;mu<Nd;mu++){
+      U[mu] = peekLorentz(out,mu);
+    }
+    Lattice<iScalar<vInteger>> coor(U[3]._grid);
+    LatticeCoordinate(coor, 3);  
+    U[3] = where(coor==(Tmax), 0.*U[3], U[3]);
+    pokeLorentz(out, U[3], 3);
+    
+    for (int mu=0;mu<Nd-1;mu++){
+      LatticeCoordinate(coor, 3);
+      U[mu] = where(coor==0, W_bc, U[mu]);
+      U[mu] = where(coor==(Tmax), Wprime_bc, U[mu]);
+      pokeLorentz(out, U[mu], mu);
+    }
+  }
+
+
+//=============================================
+// NON ABELIAN SF STUFF
+
+  template <typename GaugeField>
+  static void HotConfigurationNonAbelianSF(GridParallelRNG &pRNG, GaugeField &out, GaugeField &in) {
+    typedef typename GaugeField::vector_type vector_type;
+    typedef iSUnMatrix<vector_type> vMatrixType;
+    typedef Lattice<vMatrixType> LatticeMatrixType;
+
+    LatticeMatrixType Umu(out._grid);
+    for (int mu = 0; mu < Nd; mu++) {
+      LieRandomize(pRNG, Umu, 1.0);
+      PokeIndex<LorentzIndex>(out, Umu, mu);
+    }
+
+    int T   = out._grid->GlobalDimensions()[3];
+    int X   = out._grid->GlobalDimensions()[0];
+    int Y   = out._grid->GlobalDimensions()[1];
+    int Z   = out._grid->GlobalDimensions()[2];
+    std::cout << GridLogMessage << "XxYxZxT="<<X<<"x"<<Y<<"x"<<Z<<"x"<<T<<std::endl;
+    assert((X==Y)&&(Y==Z));
+    int Tmax=T-1;
+
+    std::vector<LatticeColourMatrix> Ubc(Nd, in._grid), U(Nd, out._grid);
+    for (int mu=0;mu<Nd;mu++){
+      U[mu]   = peekLorentz(out,mu);
+      Ubc[mu] = peekLorentz(in,mu);
+    }
+    Lattice<iScalar<vInteger>> coor(U[3]._grid);
+    LatticeCoordinate(coor, 3);  
+    U[3] = where(coor==(Tmax), 0.*U[3], U[3]);
+    pokeLorentz(out, U[3], 3);
+  
+    for (int mu=0;mu<Nd-1;mu++){
+      LatticeCoordinate(coor, 3);
+      U[mu] = where(coor==0, Ubc[mu], U[mu]);
+      U[mu] = where(coor==(Tmax), Ubc[mu], U[mu]);
+      pokeLorentz(out, U[mu], mu);
+    }
+  }
+
+  template<typename GaugeField>
+  static void TepidConfigurationNonAbelianSF(GridParallelRNG &pRNG,GaugeField &out, GaugeField &in){
+    typedef typename GaugeField::vector_type vector_type;
+    typedef iSUnMatrix<vector_type> vMatrixType;
+    typedef Lattice<vMatrixType> LatticeMatrixType;
+
+    LatticeMatrixType Umu(out._grid);
+    for(int mu=0;mu<Nd;mu++){
+      LieRandomize(pRNG,Umu,0.01);
+      PokeIndex<LorentzIndex>(out,Umu,mu);
+    }
+
+    int T   = out._grid->GlobalDimensions()[3];
+    int X   = out._grid->GlobalDimensions()[0];
+    int Y   = out._grid->GlobalDimensions()[1];
+    int Z   = out._grid->GlobalDimensions()[2];
+    std::cout << GridLogMessage << "XxYxZxT="<<X<<"x"<<Y<<"x"<<Z<<"x"<<T<<std::endl;
+    assert((X==Y)&&(Y==Z));
+    int Tmax=T-1;
+
+    std::vector<LatticeColourMatrix> Ubc(Nd, in._grid), U(Nd, out._grid);
+    for (int mu=0;mu<Nd;mu++){
+      U[mu]   = peekLorentz(out,mu);
+      Ubc[mu] = peekLorentz(in,mu);
+    }
+    Lattice<iScalar<vInteger>> coor(U[3]._grid);
+    LatticeCoordinate(coor, 3);  
+    U[3] = where(coor==(Tmax), 0.*U[3], U[3]);
+    pokeLorentz(out, U[3], 3);
+  
+    for (int mu=0;mu<Nd-1;mu++){
+      LatticeCoordinate(coor, 3);
+      U[mu] = where(coor==0, Ubc[mu], U[mu]);
+      U[mu] = where(coor==(Tmax), Ubc[mu], U[mu]);
+      pokeLorentz(out, U[mu], mu);
+    }
+  }
+
+  template<typename GaugeField>
+  static void ColdConfigurationNonAbelianSF(GridParallelRNG &pRNG,GaugeField &out, GaugeField &in){
+    typedef typename GaugeField::vector_type vector_type;
+    typedef iSUnMatrix<vector_type> vMatrixType;
+    typedef Lattice<vMatrixType> LatticeMatrixType;
+
+    LatticeMatrixType Umu(out._grid);
+    Umu=1.0;
+    for(int mu=0;mu<Nd;mu++){
+      PokeIndex<LorentzIndex>(out,Umu,mu);
+    }
+
+    int T   = out._grid->GlobalDimensions()[3];
+    int X   = out._grid->GlobalDimensions()[0];
+    int Y   = out._grid->GlobalDimensions()[1];
+    int Z   = out._grid->GlobalDimensions()[2];
+    std::cout << GridLogMessage << "XxYxZxT="<<X<<"x"<<Y<<"x"<<Z<<"x"<<T<<std::endl;
+    assert((X==Y)&&(Y==Z));
+    int Tmax=T-1;
+
+    std::vector<LatticeColourMatrix> Ubc(Nd, in._grid), U(Nd, out._grid);
+    for (int mu=0;mu<Nd;mu++){
+      U[mu]   = peekLorentz(out,mu);
+      Ubc[mu] = peekLorentz(in,mu);
+    }
+    Lattice<iScalar<vInteger>> coor(U[3]._grid);
+    LatticeCoordinate(coor, 3);  
+    U[3] = where(coor==(Tmax), 0.*U[3], U[3]);
+    pokeLorentz(out, U[3], 3);
+  
+    for (int mu=0;mu<Nd-1;mu++){
+      LatticeCoordinate(coor, 3);
+      U[mu] = where(coor==0, Ubc[mu], U[mu]);
+      U[mu] = where(coor==(Tmax), Ubc[mu], U[mu]);
+      pokeLorentz(out, U[mu], mu);
+    }
+  }
+
+//=============================================
+//=============================================
+
+
+
+
+
+
+
+
   template<typename LatticeMatrixType>
   static void taProj( const LatticeMatrixType &in,  LatticeMatrixType &out){
     out = Ta(in);

@@ -62,16 +62,7 @@ int main(int argc, char **argv) {
   // Construct observables
   // here there is too much indirection 
   typedef PlaquetteMod<HMCWrapper::ImplPolicy> PlaqObs;
-  typedef TopologicalChargeMod<HMCWrapper::ImplPolicy> QObs;
   TheHMC.Resources.AddObservable<PlaqObs>();
-  TopologyObsParameters TopParams;
-  TopParams.interval = 5;
-  TopParams.do_smearing = true;
-  TopParams.Smearing.steps = 200;
-  TopParams.Smearing.step_size = 0.01;
-  TopParams.Smearing.meas_interval = 50;
-  TopParams.Smearing.maxTau = 2.0; 
-  TheHMC.Resources.AddObservable<QObs>(TopParams);
   //////////////////////////////////////////////
 
   /////////////////////////////////////////////////////////////
@@ -79,12 +70,12 @@ int main(int argc, char **argv) {
   // need wrappers of the fermionic classes 
   // that have a complex construction
   // standard
-  RealD beta = 5.6 ;
-  WilsonGaugeActionR Waction(beta);
+  std::vector<double> beta={1.0,1.0};
+  RealD ct=1.0,cs=1.0;
+  WilsonGaugeSFActionR Waction(beta,cs,ct);
   
   ActionLevel<HMCWrapper::Field> Level1(1);
   Level1.push_back(&Waction);
-  //Level1.push_back(WGMod.getPtr());
   TheHMC.TheAction.push_back(Level1);
   /////////////////////////////////////////////////////////////
 

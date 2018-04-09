@@ -116,9 +116,7 @@ for (int i = 0; i < Umu._grid->oSites(); i++){
     pokeLorentz(Umu, U[mu], mu);
   }
 #endif
-
-
-
+ 
 
 #ifdef NONABELIAN_SF
 //SF non-abelian boundary implementation:
@@ -145,7 +143,6 @@ std::vector<LatticeColourMatrix> Ubc(Nd, &Grid);
  // std::cout << U[2] << std::endl;
 #endif
 
- 
 //-----------
 //     TEST Action: 
 

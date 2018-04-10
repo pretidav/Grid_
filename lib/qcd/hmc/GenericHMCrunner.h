@@ -84,8 +84,9 @@ class HMCWrapperTemplate: public HMCRunnerBase<ReaderClass> {
     if (GridCmdOptionExists(argv, argv + argc, "--StartingType")) {
       arg = GridCmdOptionPayload(argv, argv + argc, "--StartingType");
 
-      if (arg != "HotStart" && arg != "ColdStart" && arg != "TepidStart" &&
-          arg != "CheckpointStart") {
+      if (arg != "HotStart" && arg != "ColdStart" && arg != "TepidStart" && arg != "CheckpointStart" && 
+          arg != "HotStartSF" && arg != "ColdStartSF" && arg != "TepidStartSF" && arg != "CheckpointStartSF" && 
+          arg != "HotStartNonAbelianSF" && arg != "ColdStartNonAbelianSF" && arg != "TepidStartNonAbelianSF" ) {
         std::cout << GridLogError << "Unrecognized option in --StartingType\n";
         std::cout
             << GridLogError
@@ -139,7 +140,8 @@ class HMCWrapperTemplate: public HMCRunnerBase<ReaderClass> {
   void Runner(SmearingPolicy &Smearing) {
     auto UGrid = Resources.GetCartesian();
     Resources.AddRNGs();
-    Field U(UGrid);
+    FieldMetaData header;
+    Field U(UGrid), U_bc(UGrid);
 
     // Can move this outside?
     typedef IntegratorType<SmearingPolicy> TheIntegrator;
@@ -162,7 +164,43 @@ class HMCWrapperTemplate: public HMCRunnerBase<ReaderClass> {
       Resources.GetCheckPointer()->CheckpointRestore(Parameters.StartTrajectory, U,
                                    Resources.GetSerialRNG(),
                                    Resources.GetParallelRNG());
+    } else if (Parameters.StartingType == "HotStartSF") {
+      // Hot start
+      Resources.SeedFixedIntegers();
+      Implementation::HotConfigurationSF(Resources.GetParallelRNG(), U);
+    } else if (Parameters.StartingType == "ColdStartSF") {
+      // Cold start
+      Resources.SeedFixedIntegers();
+      Implementation::ColdConfigurationSF(Resources.GetParallelRNG(), U);
+    } else if (Parameters.StartingType == "TepidStartSF") {
+      // Tepid start
+      Resources.SeedFixedIntegers();
+      Implementation::TepidConfigurationSF(Resources.GetParallelRNG(), U);
+    } else if (Parameters.StartingType == "CheckpointStartSF") {
+      // CheckpointRestart
+      Resources.GetCheckPointer()->CheckpointRestore(Parameters.StartTrajectory, U,
+                                   Resources.GetSerialRNG(),
+                                   Resources.GetParallelRNG());
+    } else if (Parameters.StartingType == "HotStartNonAbelianSF") {
+      // Hot start
+      NerscIO::readConfiguration(U_bc, header, "configBC");
+      Resources.SeedFixedIntegers();
+      Implementation::HotConfigurationNonAbelianSF(Resources.GetParallelRNG(), U, U_bc);
+    } else if (Parameters.StartingType == "ColdStartNonAbelianSF") {
+      // Cold start
+      NerscIO::readConfiguration(U_bc, header, "configBC");
+      Resources.SeedFixedIntegers();
+      Implementation::ColdConfigurationNonAbelianSF(Resources.GetParallelRNG(), U, U_bc);
+    } else if (Parameters.StartingType == "TepidStartNonAbelianSF") {
+      // Tepid start
+      Resources.SeedFixedIntegers();
+      NerscIO::readConfiguration(U_bc, header, "configBC");
+      Implementation::TepidConfigurationNonAbelianSF(Resources.GetParallelRNG(), U, U_bc);  
     }
+
+// TODO checks when restarting -> something wrong is happening with the update!
+
+
 
     Smearing.set_Field(U);
 

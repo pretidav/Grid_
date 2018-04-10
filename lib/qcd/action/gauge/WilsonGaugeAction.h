@@ -255,7 +255,7 @@ RealD NORM;
   LatticeCoordinate(coor, 3);
   int T = dSdU_mu[3]._grid->GlobalDimensions()[3];
   for (int mu=0;mu<Nd;mu++){
-    dSdU_mu[mu] = where((coor==0 || coor==T-1), 0.*dSdU_mu[mu], dSdU_mu[mu]); //this have to be commented o check the force.
+    if (mu!=Nd) dSdU_mu[mu] = where((coor==0 || coor==T-1), 0.*dSdU_mu[mu], dSdU_mu[mu]); //this have to be commented o check the force.
     PokeIndex<LorentzIndex>(dSdU, dSdU_mu[mu], mu);
   }
  }

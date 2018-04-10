@@ -120,12 +120,17 @@ class Integrator {
       Field& Us = Smearer.get_U(as[level].actions.at(a)->is_smeared);
       as[level].actions.at(a)->deriv(Us, force);  // deriv should NOT include Ta
 
+//std::cout<< force << std::endl; //all NaN on 2nd round on boundaries
+
       std::cout << GridLogIntegrator << "Smearing (on/off): " << as[level].actions.at(a)->is_smeared << std::endl;
       if (as[level].actions.at(a)->is_smeared) Smearer.smeared_force(force);
+
       force = FieldImplementation::projectForce(force); // Ta for gauge fields
       Real force_abs = std::sqrt(norm2(force)/U._grid->gSites());
+
       std::cout << GridLogIntegrator << "Force average: " << force_abs << std::endl;
       Mom -= force * ep; 
+      std::cout << "Updated mom=" << Mom << std::endl;
     }
 
     // Force from the other representations
@@ -138,6 +143,7 @@ class Integrator {
     t_U += ep;
     int fl = levels - 1;
     std::cout << GridLogIntegrator << "   " << "[" << fl << "] U " << " dt " << ep << " : t_U " << t_U << std::endl;
+   // std::cout << "UPDATEU" << std::endl;
   }
   
   void update_U(MomentaField& Mom, Field& U, double ep) {
@@ -214,7 +220,8 @@ class Integrator {
     assert(P._grid == U._grid);
     std::cout << GridLogIntegrator << "Integrator refresh\n";
 
-    FieldImplementation::generate_momenta(P, pRNG);
+
+    FieldImplementation::generate_momentaSF(P, pRNG); //No updates on the boundary!
 
     // Update the smeared fields, can be implemented as observer
     // necessary to keep the fields updated even after a reject

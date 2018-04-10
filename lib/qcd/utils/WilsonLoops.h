@@ -123,7 +123,18 @@ public:
     return sumplaq / vol / faces / Nc; // Nd , Nc dependent... FIXME
   }
 
-
+  static Real avgPlaquetteBLK(const GaugeLorentz &Umu) {
+    int ndim = Umu._grid->_ndimension;
+    int X   = Umu._grid->GlobalDimensions()[0];
+    int Y   = Umu._grid->GlobalDimensions()[1];
+    int Z   = Umu._grid->GlobalDimensions()[2];
+    
+    Real sumplaq = sumPlaquette(Umu);
+    Real vol = Umu._grid->gSites();
+    Real faces = (1.0 * ndim * (ndim - 1)) / 2.0;
+    return sumplaq / (vol-X*Y*Z) / faces / Nc; // Nc dependent... FIXME
+  }
+  
   //////////////////////////////////////////////////
   // average over all x,y,z the temporal loop
   //////////////////////////////////////////////////

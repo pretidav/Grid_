@@ -97,21 +97,44 @@ public:
     }
   }
 
+  static inline void generate_momentaSF(Field &P, GridParallelRNG &pRNG) {
+    // specific for SF where momenta @ t=0,T-1 are identically 0. 
+
+    LinkField Pmu(P._grid);
+    Pmu = zero;
+
+    Lattice<iScalar<vInteger>> coor(Pmu._grid);
+    LatticeCoordinate(coor, Nd-1);
+    int T = Pmu._grid->GlobalDimensions()[Nd-1];
+
+    for (int mu = 0; mu < Nd; mu++) {
+      SU<Nrepresentation>::GaussianFundamentalLieAlgebraMatrix(pRNG, Pmu);
+        if (mu!=Nd-1) Pmu = where((coor==0 || coor==T-1), 0.*Pmu, Pmu); 
+        if (mu==Nd-1) Pmu = where((coor==T-1), 0.*Pmu, Pmu); 
+      PokeIndex<LorentzIndex>(P, Pmu, mu);
+    }
+  }
+
   static inline Field projectForce(Field &P) { return Ta(P); }
 
   static inline void update_field(Field& P, Field& U, double ep){
-    //static std::chrono::duration<double> diff;
 
-    //auto start = std::chrono::high_resolution_clock::now();
+std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
+std::cout << "MOMENTI=" << P << std::endl; 
+
     parallel_for(int ss=0;ss<P._grid->oSites();ss++){
       for (int mu = 0; mu < Nd; mu++) 
-        U[ss]._internal[mu] = ProjectOnGroup(Exponentiate(P[ss]._internal[mu], ep, Nexp) * U[ss]._internal[mu]);
+        U[ss]._internal[mu] = ProjectOnGroup(exp(P[ss]._internal[mu]) * U[ss]._internal[mu]); 
     }
-    
-    //auto end = std::chrono::high_resolution_clock::now();
-   // diff += end - start;
-   // std::cout << "Time to exponentiate matrix " << diff.count() << " s\n";
   }
+
+  static inline void update_fieldSF(Field& P, Field& U, double ep){
+    parallel_for(int ss=0;ss<P._grid->oSites();ss++){
+      for (int mu = 0; mu < Nd; mu++) 
+        U[ss]._internal[mu] = ProjectOnGroup(Exponentiate(P[ss]._internal[mu], ep, Nexp) * U[ss]._internal[mu]); 
+    }
+  }
+
 
   static inline RealD FieldSquareNorm(Field& U){
     LatticeComplex Hloc(U._grid);

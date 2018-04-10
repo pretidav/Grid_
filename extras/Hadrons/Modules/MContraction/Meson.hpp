@@ -154,7 +154,7 @@ void TMeson<FImpl1, FImpl2>::parseGammaString(std::vector<GammaPair> &gammaList)
     } 
 }
 
-// execution ///////////////////////////////////////////////////////////////////
+// setup   ///////////////////////////////////////////////////////////////////
 template <typename FImpl1, typename FImpl2>
 void TMeson<FImpl1, FImpl2>::setup(void)
 {

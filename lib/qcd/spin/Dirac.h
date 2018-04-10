@@ -45,6 +45,13 @@ inline QCD::Gamma adj(const QCD::Gamma &g)
    return QCD::Gamma (QCD::Gamma::adj[g.g]);
 }
 
+// Dirac algebra transpose operator (not in QCD:: to overload other transpose)
+inline QCD::Gamma transpose(const QCD::Gamma &g)
+{
+   return QCD::Gamma (QCD::Gamma::transpose[g.g]);
+}
+
+
 namespace QCD {
 
 // Dirac algebra mutliplication operator

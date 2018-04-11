@@ -801,6 +801,7 @@ template<typename GaugeField,typename GaugeMat>
     phiprime_SF[1] = -phi_SF[2] + 2/3 * M_PI;
     phiprime_SF[2] = -phi_SF[1] + 2/3 * M_PI;   
 
+  
     for (int i = 0; i < out._grid->oSites(); i++){
       W_bc._odata[i]()()(0, 0) = exp(ComplexD(0.0, 1./X)*phi_SF[0]);
       W_bc._odata[i]()()(1, 1) = exp(ComplexD(0.0, 1./X)*phi_SF[1]);
@@ -816,10 +817,10 @@ template<typename GaugeField,typename GaugeMat>
     }
     Lattice<iScalar<vInteger>> coor(U[3]._grid);
     LatticeCoordinate(coor, 3);  
-    U[3] = where(coor==(Tmax), 0.*U[3], U[3]);
+    U[3] = where(coor==(Tmax),  0.*U[3], U[3]);
     pokeLorentz(out, U[3], 3);
+    LatticeCoordinate(coor, 3);
     for (int mu=0;mu<Nd-1;mu++){
-      LatticeCoordinate(coor, 3);
       U[mu] = where(coor==0, W_bc, U[mu]);
       U[mu] = where(coor==(Tmax), Wprime_bc, U[mu]);
       pokeLorentz(out, U[mu], mu);
@@ -921,6 +922,7 @@ template<typename GaugeField,typename GaugeMat>
     phiprime_SF[0] = -phi_SF[0] - 4/3 * M_PI;
     phiprime_SF[1] = -phi_SF[2] + 2/3 * M_PI;
     phiprime_SF[2] = -phi_SF[1] + 2/3 * M_PI;   
+
 
     for (int i = 0; i < out._grid->oSites(); i++){
       W_bc._odata[i]()()(0, 0) = exp(ComplexD(0.0, 1./X)*phi_SF[0]);

@@ -259,12 +259,6 @@ RealD NORM;
     if (mu==Nd-1) dSdU_mu[mu] = where((coor==T-1), 0.*dSdU_mu[mu], dSdU_mu[mu]); // this is irrelevant since U3(x0=T-1)*dSdU=0 anyway. 
     PokeIndex<LorentzIndex>(dSdU, dSdU_mu[mu], mu);
   }
-
-  //std::cout << "U=" << U << std::endl;
-
-
-  //std::cout << "dSdU=" << dSdU << std::endl;
-
  }
 //private:
 //  RealD beta;  

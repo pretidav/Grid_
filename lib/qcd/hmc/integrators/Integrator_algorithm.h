@@ -187,7 +187,6 @@ class MinimumNorm2 : public Integrator<FieldImplementation, SmearingPolicy,
       } else {  // recursive function call
         this->step(U, level + 1, first_step, 0);
       }
-
       this->update_P(U, level, (1.0 - 2.0 * lambda) * eps);
 
       if (level == fl) {  // lowest level

@@ -98,15 +98,12 @@ public:
   }
 
   static inline void generate_momentaSF(Field &P, GridParallelRNG &pRNG) {
-    // specific for SF where momenta @ t=0,T-1 are identically 0. 
-
+    // specific P0_{mu}(x,t) for SF where momenta @ t=0,T-1 are identically 0. 
     LinkField Pmu(P._grid);
     Pmu = zero;
-
     Lattice<iScalar<vInteger>> coor(Pmu._grid);
     LatticeCoordinate(coor, Nd-1);
     int T = Pmu._grid->GlobalDimensions()[Nd-1];
-
     for (int mu = 0; mu < Nd; mu++) {
       SU<Nrepresentation>::GaussianFundamentalLieAlgebraMatrix(pRNG, Pmu);
         if (mu!=Nd-1) Pmu = where((coor==0 || coor==T-1), 0.*Pmu, Pmu); 
@@ -118,21 +115,45 @@ public:
   static inline Field projectForce(Field &P) { return Ta(P); }
 
   static inline void update_field(Field& P, Field& U, double ep){
-
-std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
-std::cout << "MOMENTI=" << P << std::endl; 
-
-    parallel_for(int ss=0;ss<P._grid->oSites();ss++){
-      for (int mu = 0; mu < Nd; mu++) 
-        U[ss]._internal[mu] = ProjectOnGroup(exp(P[ss]._internal[mu]) * U[ss]._internal[mu]); 
-    }
-  }
-
-  static inline void update_fieldSF(Field& P, Field& U, double ep){
     parallel_for(int ss=0;ss<P._grid->oSites();ss++){
       for (int mu = 0; mu < Nd; mu++) 
         U[ss]._internal[mu] = ProjectOnGroup(Exponentiate(P[ss]._internal[mu], ep, Nexp) * U[ss]._internal[mu]); 
     }
+  }
+
+  static inline void update_fieldSF(Field& P, Field& U, double ep){
+    //std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
+    //std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
+    //std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
+    //std::cout << "Uold=" << U << std::endl; 
+  LatticeColourMatrix Umu(U._grid), Pmu(P._grid);
+  int lvol = U._grid->lSites();
+  std::vector<int> lcoor;
+  ColourMatrix Umux, Pmux;
+  int T   = U._grid->GlobalDimensions()[3];
+
+  for (int mu = 0; mu < Nd; mu++){ 
+      Umu = peekLorentz(U,mu);
+      Pmu = peekLorentz(P,mu);
+    for(int site=0;site<lvol;site++){
+      U._grid->LocalIndexToLocalCoor(site, lcoor);
+//      std::cout << lcoor << " mu= " << mu << std::endl;
+      peekLocalSite(Umux, Umu, lcoor);
+      peekLocalSite(Pmux, Pmu, lcoor);  
+      if (mu!=3 && (lcoor[3]!=0 && lcoor[3]!=T-1)){            
+        Umux = ProjectOnGroup(Exponentiate(Pmux, ep, Nexp) * Umux);    
+      }
+      if (mu==3 && lcoor[3]!=T-1){        
+        Umux = ProjectOnGroup(Exponentiate(Pmux, ep, Nexp) * Umux);
+      }
+      pokeLocalSite(Umux, Umu, lcoor); 
+      }
+      pokeLorentz(U, Umu, mu);
+    }
+    //std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
+    //std::cout << "MOMENTI=" << P << std::endl; 
+    //std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
+    //std::cout << "Unew=" << U << std::endl; 
   }
 
 

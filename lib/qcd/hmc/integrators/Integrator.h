@@ -126,11 +126,10 @@ class Integrator {
       if (as[level].actions.at(a)->is_smeared) Smearer.smeared_force(force);
 
       force = FieldImplementation::projectForce(force); // Ta for gauge fields
-      Real force_abs = std::sqrt(norm2(force)/U._grid->gSites());
+      Real force_abs = std::sqrt(norm2(force)/U._grid->gSites()); //this have to be corrected   ????!!!!!
 
       std::cout << GridLogIntegrator << "Force average: " << force_abs << std::endl;
       Mom -= force * ep; 
-      std::cout << "Updated mom=" << Mom << std::endl;
     }
 
     // Force from the other representations
@@ -148,7 +147,7 @@ class Integrator {
   
   void update_U(MomentaField& Mom, Field& U, double ep) {
     // exponential of Mom*U in the gauge fields case
-    FieldImplementation::update_field(Mom, U, ep);
+    FieldImplementation::update_fieldSF(Mom, U, ep); //<---- HACK
 
     // Update the smeared fields, can be implemented as observer
     Smearer.set_Field(U);

@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
   // Construct observables
   // here there is too much indirection 
   typedef PlaquetteMod<HMCWrapper::ImplPolicy> PlaqObs;
-  TheHMC.Resources.AddObservable<PlaqObs>();
+  TheHMC.Resources.AddObservable<PlaqObs>();                //it is NAN!
   //////////////////////////////////////////////
 
   /////////////////////////////////////////////////////////////
@@ -70,12 +70,13 @@ int main(int argc, char **argv) {
   // need wrappers of the fermionic classes 
   // that have a complex construction
   // standard
-  std::vector<double> beta={1.0,1.0};
+  std::vector<double> beta={6.0,6.0};
   RealD ct=1.0,cs=1.0;
   WilsonGaugeSFActionR Waction(beta,cs,ct);
-  
+  WilsonGaugeActionR Waction2(beta[1]);
+
   ActionLevel<HMCWrapper::Field> Level1(1);
-  Level1.push_back(&Waction);
+  Level1.push_back(&Waction2);
   TheHMC.TheAction.push_back(Level1);
   /////////////////////////////////////////////////////////////
 

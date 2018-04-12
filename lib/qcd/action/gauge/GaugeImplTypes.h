@@ -137,15 +137,35 @@ public:
       Pmu = peekLorentz(P,mu);
     for(int site=0;site<lvol;site++){
       U._grid->LocalIndexToLocalCoor(site, lcoor);
-//      std::cout << lcoor << " mu= " << mu << std::endl;
+      std::cout << lcoor << " mu= " << mu << std::endl;
       peekLocalSite(Umux, Umu, lcoor);
-      peekLocalSite(Pmux, Pmu, lcoor);  
+      peekLocalSite(Pmux, Pmu, lcoor);
       if (mu!=3 && (lcoor[3]!=0 && lcoor[3]!=T-1)){            
-        Umux = ProjectOnGroup(Exponentiate(Pmux, ep, Nexp) * Umux);    
+      std::cout << "Pmux" << std::endl;  
+      std::cout << Pmux << std::endl;
+      std::cout << "expm(Pmux)" << std::endl;  
+      std::cout << Exponentiate(Pmux, ep, Nexp) << std::endl;
+      std::cout << "Umux PRE" << std::endl;  
+      std::cout << Umux << std::endl;  
+        Umux = ProjectOnGroup(Exponentiate(Pmux, ep, Nexp) * Umux);   
+      std::cout << "det(Umux)=" <<  Determinant(Umux) << std::endl;
+
+      std::cout << "Umux POST" << std::endl;   
+      std::cout << Umux << std::endl;   
       }
       if (mu==3 && lcoor[3]!=T-1){        
+      std::cout << "Pmux" << std::endl;  
+      std::cout << Pmux << std::endl;
+      std::cout << "expm(Pmux)" << std::endl;  
+      std::cout << Exponentiate(Pmux, ep, Nexp) << std::endl;
+      std::cout << "Umux PRE" << std::endl;  
+      std::cout << Umux << std::endl;  
         Umux = ProjectOnGroup(Exponentiate(Pmux, ep, Nexp) * Umux);
+      std::cout << "det(Umux)=" <<  Determinant(Umux) << std::endl;
+      std::cout << "Umux POST" << std::endl;   
+      std::cout << Umux << std::endl;  
       }
+      Umux=ProjectOnGroup(Umux);
       pokeLocalSite(Umux, Umu, lcoor); 
       }
       pokeLorentz(U, Umu, mu);

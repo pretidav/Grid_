@@ -177,6 +177,29 @@ public:
     return p.real() / vol / 4.0 / 3.0;
   };
 
+
+  //////////////////////////////////////////////////
+  //           g2SF= norm * dSdeta                //
+  //////////////////////////////////////////////////
+  static RealD dSdeta(const GaugeLorentz &Umu) {
+    std::vector<GaugeMat> U(Nd, Umu._grid);
+    ComplexField Tr(Umu._grid);
+
+    Tr = zero;
+    for (int mu = 0; mu < Nd; mu++) {
+      U[mu] = PeekIndex<LorentzIndex>(Umu, mu);
+      Tr = Tr + trace(U[mu]);
+    }
+
+    auto Tp = sum(Tr);
+    auto p = TensorRemove(Tp);
+
+    double vol = Umu._grid->gSites();
+
+    return p.real() / vol / 4.0 / 3.0;
+  };
+
+
   //////////////////////////////////////////////////
   // the sum over all staples on each site in direction mu,nu
   //////////////////////////////////////////////////

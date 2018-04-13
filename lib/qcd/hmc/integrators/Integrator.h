@@ -120,8 +120,6 @@ class Integrator {
       Field& Us = Smearer.get_U(as[level].actions.at(a)->is_smeared);
       as[level].actions.at(a)->deriv(Us, force);  // deriv should NOT include Ta
 
-//std::cout<< force << std::endl; //all NaN on 2nd round on boundaries
-
       std::cout << GridLogIntegrator << "Smearing (on/off): " << as[level].actions.at(a)->is_smeared << std::endl;
       if (as[level].actions.at(a)->is_smeared) Smearer.smeared_force(force);
 
@@ -147,7 +145,7 @@ class Integrator {
   
   void update_U(MomentaField& Mom, Field& U, double ep) {
     // exponential of Mom*U in the gauge fields case
-    FieldImplementation::update_fieldSF(Mom, U, ep); //<---- HACK
+    FieldImplementation::update_field(Mom, U, ep); //<---- HACK
 
     // Update the smeared fields, can be implemented as observer
     Smearer.set_Field(U);

@@ -115,12 +115,26 @@ public:
   static inline Field projectForce(Field &P) { return Ta(P); }
 
   static inline void update_field(Field& P, Field& U, double ep){
-    parallel_for(int ss=0;ss<P._grid->oSites();ss++){
-      for (int mu = 0; mu < Nd; mu++) 
-        U[ss]._internal[mu] = ProjectOnGroup(Exponentiate(P[ss]._internal[mu], ep, Nexp) * U[ss]._internal[mu]); 
+    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
+    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
+    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
+    //std::cout << "Uold=" << U << std::endl; 
+    Lattice<iScalar<double>> Z(U._grid);
+    Z=0.0001;
+    
+    for(int ss=0;ss<P._grid->oSites();ss++){
+      for (int mu = 0; mu < Nd; mu++){
+        U[ss]._internal[mu] = Exponentiate(P[ss]._internal[mu], ep, Nexp) * U[ss]._internal[mu]; 
+        U[ss]._internal[mu] = ProjectOnGroup(U[ss]._internal[mu]);
+      }
     }
+    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
+   // std::cout << "MOMENTI=" << P << std::endl; 
+    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
+   // std::cout << "Unew=" << U << std::endl; 
   }
 
+/*
   static inline void update_fieldSF(Field& P, Field& U, double ep){
     //std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
     //std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
@@ -140,18 +154,21 @@ public:
       std::cout << lcoor << " mu= " << mu << std::endl;
       peekLocalSite(Umux, Umu, lcoor);
       peekLocalSite(Pmux, Pmu, lcoor);
+      std::cout << "Umux PRE" << std::endl;  
+      std::cout << Umux << std::endl;  
       if (mu!=3 && (lcoor[3]!=0 && lcoor[3]!=T-1)){            
       std::cout << "Pmux" << std::endl;  
       std::cout << Pmux << std::endl;
       std::cout << "expm(Pmux)" << std::endl;  
       std::cout << Exponentiate(Pmux, ep, Nexp) << std::endl;
-      std::cout << "Umux PRE" << std::endl;  
-      std::cout << Umux << std::endl;  
-        Umux = ProjectOnGroup(Exponentiate(Pmux, ep, Nexp) * Umux);   
-      std::cout << "det(Umux)=" <<  Determinant(Umux) << std::endl;
-
+      Umux = Exponentiate(Pmux, ep, Nexp) * Umux;   
       std::cout << "Umux POST" << std::endl;   
       std::cout << Umux << std::endl;   
+      std::cout << "det(Umux)=" <<  Determinant(Umux) << std::endl;
+      Umux=ProjectOnGroup(Umux);
+      std::cout << "Umux POST-PROJECTED" << std::endl;   
+      std::cout << Umux << std::endl;  
+      std::cout << "det(Umux)=" <<  Determinant(Umux) << std::endl;
       }
       if (mu==3 && lcoor[3]!=T-1){        
       std::cout << "Pmux" << std::endl;  
@@ -160,12 +177,16 @@ public:
       std::cout << Exponentiate(Pmux, ep, Nexp) << std::endl;
       std::cout << "Umux PRE" << std::endl;  
       std::cout << Umux << std::endl;  
-        Umux = ProjectOnGroup(Exponentiate(Pmux, ep, Nexp) * Umux);
-      std::cout << "det(Umux)=" <<  Determinant(Umux) << std::endl;
+      Umux = Exponentiate(Pmux, ep, Nexp) * Umux;
       std::cout << "Umux POST" << std::endl;   
       std::cout << Umux << std::endl;  
-      }
+      std::cout << "det(Umux)=" <<  Determinant(Umux) << std::endl;
       Umux=ProjectOnGroup(Umux);
+      std::cout << "Umux POST-PROJECTED" << std::endl;   
+      std::cout << Umux << std::endl;  
+      std::cout << "det(Umux)=" <<  Determinant(Umux) << std::endl;
+      }
+
       pokeLocalSite(Umux, Umu, lcoor); 
       }
       pokeLorentz(U, Umu, mu);
@@ -175,7 +196,7 @@ public:
     //std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
     //std::cout << "Unew=" << U << std::endl; 
   }
-
+*/
 
   static inline RealD FieldSquareNorm(Field& U){
     LatticeComplex Hloc(U._grid);

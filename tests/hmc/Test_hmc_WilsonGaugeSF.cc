@@ -70,10 +70,10 @@ int main(int argc, char **argv) {
   // need wrappers of the fermionic classes 
   // that have a complex construction
   // standard
-  std::vector<double> beta={6.0,6.0};
+  std::vector<RealD> beta={6.0,6.0};
   RealD ct=1.0,cs=1.0;
   WilsonGaugeSFActionR Waction(beta,cs,ct);
-  WilsonGaugeActionR Waction2(beta[1]);
+  WilsonGaugeActionR Waction2(beta[0]);
 
   ActionLevel<HMCWrapper::Field> Level1(1);
   Level1.push_back(&Waction2);

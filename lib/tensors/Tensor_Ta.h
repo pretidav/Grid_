@@ -94,15 +94,17 @@ namespace Grid {
       iMatrix<vtype,N> ret(arg);
       vtype nrm;
       vtype inner;
+    
       for(int c1=0;c1<N;c1++){
 	zeroit(inner);	
 	for(int c2=0;c2<N;c2++)
 	  inner += innerProduct(ret._internal[c1][c2],ret._internal[c1][c2]);
-
 	nrm = rsqrt(inner);
+
+
 	for(int c2=0;c2<N;c2++)
 	  ret._internal[c1][c2]*= nrm;
-      
+
 	for (int b=c1+1; b<N; ++b){
 	  decltype(ret._internal[b][b]*ret._internal[b][b]) pr;
 	  zeroit(pr);
@@ -113,9 +115,11 @@ namespace Grid {
 	    ret._internal[b][c] -= pr * ret._internal[c1][c];
 	  }
 	}
-	  
-      }
+      
       // assuming the determinant is ok
+
+      }
+
       return ret;
     }
 

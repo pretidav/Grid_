@@ -2,11 +2,11 @@
 
 Grid physics library, www.github.com/paboyle/Grid
 
-Source file: ./lib/qcd/observables/hmc_observable.h
+Source file: ./lib/qcd/modules/plaquette.h
 
 Copyright (C) 2017
 
-Author: Guido Cossu <guido.cossu@ed.ac.uk>
+Author: David Preti <david.preti@to.infn.it>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -27,26 +27,42 @@ directory
 *************************************************************************************/
 /*  END LEGAL */
 
-#ifndef HMC_OBSERVABLE_H
-#define HMC_OBSERVABLE_H
+#ifndef HMC_DSDETA_H
+#define HMC_DSDETA_H
 
-namespace Grid{
+namespace Grid {
+namespace QCD {
 
-template <class Field>
-class HmcObservable {
+// this is only defined for a gauge theory
+template <class Impl>
+class dSdetaLogger : public HmcObservable<typename Impl::Field> {
  public:
-  virtual void TrajectoryComplete(int traj,
-                                  Field &U,
-                                  GridSerialRNG &sRNG,
-                                  GridParallelRNG &pRNG) = 0;
+  // here forces the Impl to be of gauge fields
+  // if not the compiler will complain
+  INHERIT_GIMPL_TYPES(Impl);
+
+  // necessary for HmcObservable compatibility
+  typedef typename Impl::Field Field;
+
+  void TrajectoryComplete(int traj,
+                          Field &U,
+                          GridSerialRNG &sRNG,
+                          GridParallelRNG &pRNG) {
+
+    RealD dSdeta = WilsonLoops<Impl>::dSdeta(U);
+
+    int def_prec = std::cout.precision();
+
+    std::cout << GridLogMessage
+        << std::setprecision(std::numeric_limits<Real>::digits10 + 1)
+        << "dSdeta: [ " << traj << " ] "<< dSdeta << std::endl;
+
+    std::cout.precision(def_prec);
+
+  }
 };
 
+}  // namespace QCD
 }  // namespace Grid
 
-#include "plaquette.h"
-#include "topological_charge.h"
-#include "polyakov_loop.h"
-#include "dSdeta.h"
-
-
-#endif  //  HMC_OBSERVABLE_H
+#endif  // HMC_DSDETA_H

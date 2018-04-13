@@ -54,6 +54,8 @@ template<class vtype, int N> inline iVector<vtype, N> Exponentiate(const iVector
 
 
 
+/*
+
     // Specialisation: Cayley-Hamilton exponential for SU(3)
     template<class vtype, typename std::enable_if< GridTypeMapper<vtype>::TensorLevel == 0>::type * =nullptr> 
     inline iMatrix<vtype,3> Exponentiate(const iMatrix<vtype,3> &arg, RealD alpha  , Integer Nexp = DEFAULT_MAT_EXP )
@@ -63,6 +65,10 @@ template<class vtype, int N> inline iVector<vtype, N> Exponentiate(const iVector
     // exp ( input matrix )
     // the i sign is coming from outside
     // input matrix is anti-hermitian NOT hermitian
+
+
+
+    
       typedef iMatrix<vtype,3> mat;
       typedef iScalar<vtype> scalar;
       mat unit(1.0);
@@ -116,6 +122,7 @@ template<class vtype, int N> inline iVector<vtype, N> Exponentiate(const iVector
       return (f0 * unit + timesMinusI(f1) * arg*alpha - f2 * iQ2);
     }
 
+*/
 
 
 // General exponential
@@ -126,6 +133,8 @@ template<class vtype,int N, typename std::enable_if< GridTypeMapper<vtype>::Tens
     // exp ( input matrix )
     // the i sign is coming from outside
     // input matrix is anti-hermitian NOT hermitian
+
+
       typedef iMatrix<vtype,N> mat;
       mat unit(1.0);
       mat temp(unit);

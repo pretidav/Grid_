@@ -147,6 +147,7 @@ class HMCWrapperTemplate: public HMCRunnerBase<ReaderClass> {
     typedef IntegratorType<SmearingPolicy> TheIntegrator;
     TheIntegrator MDynamics(UGrid, Parameters.MD, TheAction, Smearing);
 
+    // PERIODIC/ADJOINT BOUNDARIES
     if (Parameters.StartingType == "HotStart") {
       // Hot start
       Resources.SeedFixedIntegers();
@@ -164,7 +165,9 @@ class HMCWrapperTemplate: public HMCRunnerBase<ReaderClass> {
       Resources.GetCheckPointer()->CheckpointRestore(Parameters.StartTrajectory, U,
                                    Resources.GetSerialRNG(),
                                    Resources.GetParallelRNG());
-    } else if (Parameters.StartingType == "HotStartSF") {
+    } 
+    //ABELIAN SF BOUNDARIES
+    else if (Parameters.StartingType == "HotStartSF") {
       // Hot start
       Resources.SeedFixedIntegers();
       Implementation::HotConfigurationSF(Resources.GetParallelRNG(), U);
@@ -181,20 +184,25 @@ class HMCWrapperTemplate: public HMCRunnerBase<ReaderClass> {
       Resources.GetCheckPointer()->CheckpointRestore(Parameters.StartTrajectory, U,
                                    Resources.GetSerialRNG(),
                                    Resources.GetParallelRNG());
-    } else if (Parameters.StartingType == "HotStartNonAbelianSF") {
+    }
+    //NON ABELIAN SF BOUNDARIES 
+    else if (Parameters.StartingType == "HotStartNonAbelianSF") {
       // Hot start
-      NerscIO::readConfiguration(U_bc, header, "configBC");
       Resources.SeedFixedIntegers();
+      NerscIO::readConfiguration(U_bc, header, "configBC");
+      std::out << GridLogMessage << "Imported boundaries from: configBC" << std::endl;      
       Implementation::HotConfigurationNonAbelianSF(Resources.GetParallelRNG(), U, U_bc);
     } else if (Parameters.StartingType == "ColdStartNonAbelianSF") {
       // Cold start
-      NerscIO::readConfiguration(U_bc, header, "configBC");
       Resources.SeedFixedIntegers();
+      NerscIO::readConfiguration(U_bc, header, "configBC");
+      std::out << GridLogMessage << "Imported boundaries from: configBC" << std::endl;
       Implementation::ColdConfigurationNonAbelianSF(Resources.GetParallelRNG(), U, U_bc);
     } else if (Parameters.StartingType == "TepidStartNonAbelianSF") {
       // Tepid start
       Resources.SeedFixedIntegers();
       NerscIO::readConfiguration(U_bc, header, "configBC");
+      std::out << GridLogMessage << "Imported boundaries from: configBC" << std::endl;
       Implementation::TepidConfigurationNonAbelianSF(Resources.GetParallelRNG(), U, U_bc);  
     }
 

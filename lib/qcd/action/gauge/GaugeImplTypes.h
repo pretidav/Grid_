@@ -97,6 +97,17 @@ public:
     }
   }
 
+  static inline Field projectForce(Field &P) { return Ta(P); }
+
+  static inline void update_field(Field& P, Field& U, double ep){
+    parallel_for(int ss=0;ss<P._grid->oSites();ss++){
+      for (int mu = 0; mu < Nd; mu++) 
+        U[ss]._internal[mu] = ProjectOnGroup(Exponentiate(P[ss]._internal[mu], ep, Nexp) * U[ss]._internal[mu]);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  //Schrodinger Functional Specific Update:
   static inline void generate_momentaSF(Field &P, GridParallelRNG &pRNG) {
     // specific P0_{mu}(x,t) for SF where momenta @ t=0,T-1 are identically 0. 
     LinkField Pmu(P._grid);
@@ -112,91 +123,26 @@ public:
     }
   }
 
-  static inline Field projectForce(Field &P) { return Ta(P); }
 
-  static inline void update_field(Field& P, Field& U, double ep){
-    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
-    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
-    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
-    //std::cout << "Uold=" << U << std::endl; 
-    Lattice<iScalar<double>> Z(U._grid);
-    Z=0.0001;
-    
-    for(int ss=0;ss<P._grid->oSites();ss++){
+  static inline void update_fieldSF(Field& P, Field& U, double ep){
+    LatticeColourMatrix Umu(P._grid);   
+    std::cout << "U" << U << std::endl;
+    int T = P._grid->GlobalDimensions()[Nd-1];
+    parallel_for(int ss=0;ss<P._grid->oSites();ss++){
       for (int mu = 0; mu < Nd; mu++){
         U[ss]._internal[mu] = Exponentiate(P[ss]._internal[mu], ep, Nexp) * U[ss]._internal[mu]; 
-        U[ss]._internal[mu] = ProjectOnGroup(U[ss]._internal[mu]);
       }
     }
-    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
-   // std::cout << "MOMENTI=" << P << std::endl; 
-    std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
-   // std::cout << "Unew=" << U << std::endl; 
-  }
-
-/*
-  static inline void update_fieldSF(Field& P, Field& U, double ep){
-    //std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
-    //std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
-    //std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
-    //std::cout << "Uold=" << U << std::endl; 
-  LatticeColourMatrix Umu(U._grid), Pmu(P._grid);
-  int lvol = U._grid->lSites();
-  std::vector<int> lcoor;
-  ColourMatrix Umux, Pmux;
-  int T   = U._grid->GlobalDimensions()[3];
-
-  for (int mu = 0; mu < Nd; mu++){ 
+     Lattice<iScalar<vInteger>> coor(U._grid);
+    LatticeCoordinate(coor, 3);  
+    for (int mu=0;mu<Nd;mu++){
       Umu = peekLorentz(U,mu);
-      Pmu = peekLorentz(P,mu);
-    for(int site=0;site<lvol;site++){
-      U._grid->LocalIndexToLocalCoor(site, lcoor);
-      std::cout << lcoor << " mu= " << mu << std::endl;
-      peekLocalSite(Umux, Umu, lcoor);
-      peekLocalSite(Pmux, Pmu, lcoor);
-      std::cout << "Umux PRE" << std::endl;  
-      std::cout << Umux << std::endl;  
-      if (mu!=3 && (lcoor[3]!=0 && lcoor[3]!=T-1)){            
-      std::cout << "Pmux" << std::endl;  
-      std::cout << Pmux << std::endl;
-      std::cout << "expm(Pmux)" << std::endl;  
-      std::cout << Exponentiate(Pmux, ep, Nexp) << std::endl;
-      Umux = Exponentiate(Pmux, ep, Nexp) * Umux;   
-      std::cout << "Umux POST" << std::endl;   
-      std::cout << Umux << std::endl;   
-      std::cout << "det(Umux)=" <<  Determinant(Umux) << std::endl;
-      Umux=ProjectOnGroup(Umux);
-      std::cout << "Umux POST-PROJECTED" << std::endl;   
-      std::cout << Umux << std::endl;  
-      std::cout << "det(Umux)=" <<  Determinant(Umux) << std::endl;
-      }
-      if (mu==3 && lcoor[3]!=T-1){        
-      std::cout << "Pmux" << std::endl;  
-      std::cout << Pmux << std::endl;
-      std::cout << "expm(Pmux)" << std::endl;  
-      std::cout << Exponentiate(Pmux, ep, Nexp) << std::endl;
-      std::cout << "Umux PRE" << std::endl;  
-      std::cout << Umux << std::endl;  
-      Umux = Exponentiate(Pmux, ep, Nexp) * Umux;
-      std::cout << "Umux POST" << std::endl;   
-      std::cout << Umux << std::endl;  
-      std::cout << "det(Umux)=" <<  Determinant(Umux) << std::endl;
-      Umux=ProjectOnGroup(Umux);
-      std::cout << "Umux POST-PROJECTED" << std::endl;   
-      std::cout << Umux << std::endl;  
-      std::cout << "det(Umux)=" <<  Determinant(Umux) << std::endl;
-      }
-
-      pokeLocalSite(Umux, Umu, lcoor); 
-      }
+      if (mu!=Nd-1) Umu = where((coor!=0 && coor!=T-1), ProjectOnGroup(Umu), Umu); 
+      if (mu==Nd-1) Umu = where((coor!=T-1),  ProjectOnGroup(Umu), Umu); 
       pokeLorentz(U, Umu, mu);
-    }
-    //std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
-    //std::cout << "MOMENTI=" << P << std::endl; 
-    //std::cout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl; 
-    //std::cout << "Unew=" << U << std::endl; 
+    }   
   }
-*/
+  // ---------------------------------------------------------------------------
 
   static inline RealD FieldSquareNorm(Field& U){
     LatticeComplex Hloc(U._grid);

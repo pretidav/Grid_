@@ -145,7 +145,7 @@ class Integrator {
   
   void update_U(MomentaField& Mom, Field& U, double ep) {
     // exponential of Mom*U in the gauge fields case
-    FieldImplementation::update_field(Mom, U, ep); //<---- HACK
+    FieldImplementation::update_fieldSF(Mom, U, ep); //<---- HACK
 
     // Update the smeared fields, can be implemented as observer
     Smearer.set_Field(U);

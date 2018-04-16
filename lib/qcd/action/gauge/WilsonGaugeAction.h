@@ -90,19 +90,17 @@ class WilsonGaugeAction : public Action<typename Gimpl::GaugeField> {
   }
 private:
   RealD beta;  
+
 };
 
 
 
-
-
-
-
 ////////////////////////////////////////////////////////////////////////
-// Wilson Gauge Action .. should I template the Nc etc..
+// #define is pretty ugly. Should be fixed as soon as I can.
 ////////////////////////////////////////////////////////////////////////
 template <class Gimpl>
 class WilsonGaugeSFAction : public Action<typename Gimpl::GaugeField> {
+ //#define SF_IMPLEMENTATION //very very ugly.
  public:  
   INHERIT_GIMPL_TYPES(Gimpl);
 
@@ -260,8 +258,7 @@ RealD NORM;
     PokeIndex<LorentzIndex>(dSdU, dSdU_mu[mu], mu);
   }
  }
-//private:
-//   std::vector<double> vbeta;  
+
 };
 
 }

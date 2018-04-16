@@ -126,7 +126,6 @@ public:
 
   static inline void update_fieldSF(Field& P, Field& U, double ep){
     LatticeColourMatrix Umu(P._grid);   
-    std::cout << "U" << U << std::endl;
     int T = P._grid->GlobalDimensions()[Nd-1];
     parallel_for(int ss=0;ss<P._grid->oSites();ss++){
       for (int mu = 0; mu < Nd; mu++){

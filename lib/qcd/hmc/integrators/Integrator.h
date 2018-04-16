@@ -103,7 +103,9 @@ class Integrator {
         // Implement smearing only for the fundamental representation now
         repr_set.at(a)->deriv(Rep.U, forceR);
         GF force = Rep.RtoFundamentalProject(forceR);  // Ta for the fundamental rep
-        Real force_abs = std::sqrt(norm2(force)/(U._grid->gSites()));
+        
+        std::cout << "WARNING: ENTERING HIREP!" << std::endl;
+        Real force_abs = std::sqrt(norm2(force)/(U._grid->gSites())); 
         std::cout << GridLogIntegrator << "Hirep Force average: " << force_abs << std::endl;
         Mom -= force * ep ;
       }
@@ -124,7 +126,19 @@ class Integrator {
       if (as[level].actions.at(a)->is_smeared) Smearer.smeared_force(force);
 
       force = FieldImplementation::projectForce(force); // Ta for gauge fields
-      Real force_abs = std::sqrt(norm2(force)/U._grid->gSites()); //this have to be corrected   ????!!!!!
+      Real force_abs;
+
+       if (as[level].actions.at(a)->isSF==false){
+          std::cout<< "updateP: not SF" << std::endl;
+          force_abs = std::sqrt(norm2(force)/(U._grid->gSites())); 
+      } else if (as[level].actions.at(a)->isSF==true){
+          std::cout<< "updateP: SF" << std::endl;
+          int X   = U._grid->GlobalDimensions()[0];
+          int Y   = U._grid->GlobalDimensions()[1];
+          int Z   = U._grid->GlobalDimensions()[2];
+          force_abs = std::sqrt(norm2(force)/(U._grid->gSites() - X*Y*Z));
+      }
+      //Real force_abs = std::sqrt(norm2(force)/U._grid->gSites()); //this have to be corrected   ????!!!!!
 
       std::cout << GridLogIntegrator << "Force average: " << force_abs << std::endl;
       Mom -= force * ep; 
@@ -145,7 +159,14 @@ class Integrator {
   
   void update_U(MomentaField& Mom, Field& U, double ep) {
     // exponential of Mom*U in the gauge fields case
-    FieldImplementation::update_fieldSF(Mom, U, ep); //<---- HACK
+
+    if(as[0].actions.at(0)->isSF==true){
+    std::cout<< "updateU: SF" << std::endl;
+    FieldImplementation::update_fieldSF(Mom, U, ep); 
+    } else if (as[0].actions.at(0)->isSF==false){
+    std::cout<< "updateU: not SF" << std::endl;
+    FieldImplementation::update_field(Mom, U, ep); 
+    }
 
     // Update the smeared fields, can be implemented as observer
     Smearer.set_Field(U);
@@ -217,8 +238,14 @@ class Integrator {
     assert(P._grid == U._grid);
     std::cout << GridLogIntegrator << "Integrator refresh\n";
 
-
+    if(as[0].actions.at(0)->isSF==true){
+    std::cout<< "refreshP: SF" << std::endl;
     FieldImplementation::generate_momentaSF(P, pRNG); //No updates on the boundary!
+    }
+    else if (as[0].actions.at(0)->isSF==false){
+      std::cout<< "refreshP: not SF" << std::endl;
+    FieldImplementation::generate_momenta(P, pRNG); //No updates on the boundary!
+    }
 
     // Update the smeared fields, can be implemented as observer
     // necessary to keep the fields updated even after a reject

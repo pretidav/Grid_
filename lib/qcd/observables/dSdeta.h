@@ -27,12 +27,17 @@ directory
 *************************************************************************************/
 /*  END LEGAL */
 
+
+
+
 #ifndef HMC_DSDETA_H
 #define HMC_DSDETA_H
 
 namespace Grid {
 namespace QCD {
 
+
+/*
 // this is only defined for a gauge theory
 template <class Impl>
 class dSdetaLogger : public HmcObservable<typename Impl::Field> {
@@ -49,7 +54,7 @@ class dSdetaLogger : public HmcObservable<typename Impl::Field> {
                           GridSerialRNG &sRNG,
                           GridParallelRNG &pRNG) {
 
-    RealD dSdeta = WilsonLoops<Impl>::dSdeta(U);
+    RealD dSdeta = WilsonLoops<Impl>::dSdeta(U,betav,ct_SF);
 
     int def_prec = std::cout.precision();
 
@@ -61,6 +66,11 @@ class dSdetaLogger : public HmcObservable<typename Impl::Field> {
 
   }
 };
+
+
+*/ 
+
+
 
 }  // namespace QCD
 }  // namespace Grid

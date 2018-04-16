@@ -41,6 +41,9 @@ class Action
 
  public:
   bool is_smeared = false;
+  bool isSF = false;
+
+
   // Heatbath?
   virtual void refresh(const GaugeField& U, GridParallelRNG& pRNG) = 0; // refresh pseudofermions
   virtual RealD S(const GaugeField& U) = 0;                             // evaluate the action

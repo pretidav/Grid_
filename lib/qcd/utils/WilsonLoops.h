@@ -181,22 +181,48 @@ public:
   //////////////////////////////////////////////////
   //           g2SF= norm * dSdeta                //
   //////////////////////////////////////////////////
-  static RealD dSdeta(const GaugeLorentz &Umu) {
+  static RealD dSdeta(const GaugeLorentz &Umu, double *Beta, double CT) {
     std::vector<GaugeMat> U(Nd, Umu._grid);
-    ComplexField Tr(Umu._grid);
+    ColourMatrix lambda8;
+    RealD out;
+    out=0.0;
 
-    Tr = zero;
-    for (int mu = 0; mu < Nd; mu++) {
-      U[mu] = PeekIndex<LorentzIndex>(Umu, mu);
-      Tr = Tr + trace(U[mu]);
+    int T   = Umu._grid->GlobalDimensions()[3];
+    int X   = Umu._grid->GlobalDimensions()[0];
+    int Y   = Umu._grid->GlobalDimensions()[1];
+    int Z   = Umu._grid->GlobalDimensions()[2];
+
+    lambda8=zero;
+    lambda8()()(0,0) =  1;
+    lambda8()()(1,1) = -1/2;
+    lambda8()()(2,2) = -1/2;
+    std::vector <LatticeColourMatrix> E8(Nd-1, Umu._grid), E8prime(Nd-1, Umu._grid), B(Nd, Umu._grid);  
+    Lattice<iScalar<vInteger>> coor(Umu._grid);
+    LatticeCoordinate(coor, 3);  
+
+    for (int mu=0;mu<Nd;mu++){
+     U[mu]=peekLorentz(Umu,mu); 
+     B[mu]=ComplexD(0.0, 1.)*lambda8*U[mu];
+    }
+    for (int mu=0;mu<Nd-1;mu++){
+      E8[mu] =      Gimpl::CovShiftForward(B[mu],mu,
+                    Gimpl::CovShiftForward(U[3],3,
+                    Gimpl::CovShiftBackward(U[mu],mu,
+                    Gimpl::CovShiftIdentityBackward(U[3], 3))));
+      E8[mu] = where(coor==0, E8[mu], 0.*E8[mu]);
+    
+      E8prime[mu] = Gimpl::CovShiftForward(U[3],3,
+                    Gimpl::CovShiftForward(B[mu],mu,
+                    Gimpl::CovShiftBackward(U[3],3,
+                    Gimpl::CovShiftIdentityBackward(U[mu], mu))));
+      E8prime[mu] = where(coor==T-2, E8prime[mu], 0.*E8prime[mu]);
+      
+     out+= TensorRemove(sum(trace(E8[mu]))).real();
+     out-= TensorRemove(sum(trace(E8prime[mu]))).real();
     }
 
-    auto Tp = sum(Tr);
-    auto p = TensorRemove(Tp);
-
-    double vol = Umu._grid->gSites();
-
-    return p.real() / vol / 4.0 / 3.0;
+    RealD norm = - Beta[1]*CT/(3.*X);   
+    return norm*out;
   };
 
 
@@ -350,8 +376,7 @@ static void StapleMult(GaugeMat &staple, const GaugeLorentz &Umu, int mu) {
   ////////////////////////////////////////////////////////////////////////
   // the sum over all staples on each site in direction mu,nu, lower part
   ////////////////////////////////////////////////////////////////////////
-  static void StapleLower(GaugeMat &staple, const GaugeLorentz &Umu, int mu,
-                          int nu) {
+  static void StapleLower(GaugeMat &staple, const GaugeLorentz &Umu, int mu, int nu) {
     if (nu != mu) {
       GridBase *grid = Umu._grid;
 

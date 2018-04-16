@@ -261,7 +261,7 @@ RealD NORM;
   }
  }
 //private:
-//  RealD beta;  
+//   std::vector<double> vbeta;  
 };
 
 }

@@ -190,19 +190,19 @@ class HMCWrapperTemplate: public HMCRunnerBase<ReaderClass> {
       // Hot start
       Resources.SeedFixedIntegers();
       NerscIO::readConfiguration(U_bc, header, "configBC");
-      std::out << GridLogMessage << "Imported boundaries from: configBC" << std::endl;      
+      std::cout << GridLogMessage << "Imported boundaries from: configBC" << std::endl;      
       Implementation::HotConfigurationNonAbelianSF(Resources.GetParallelRNG(), U, U_bc);
     } else if (Parameters.StartingType == "ColdStartNonAbelianSF") {
       // Cold start
       Resources.SeedFixedIntegers();
       NerscIO::readConfiguration(U_bc, header, "configBC");
-      std::out << GridLogMessage << "Imported boundaries from: configBC" << std::endl;
+      std::cout << GridLogMessage << "Imported boundaries from: configBC" << std::endl;
       Implementation::ColdConfigurationNonAbelianSF(Resources.GetParallelRNG(), U, U_bc);
     } else if (Parameters.StartingType == "TepidStartNonAbelianSF") {
       // Tepid start
       Resources.SeedFixedIntegers();
       NerscIO::readConfiguration(U_bc, header, "configBC");
-      std::out << GridLogMessage << "Imported boundaries from: configBC" << std::endl;
+      std::cout << GridLogMessage << "Imported boundaries from: configBC" << std::endl;
       Implementation::TepidConfigurationNonAbelianSF(Resources.GetParallelRNG(), U, U_bc);  
     }
 

@@ -62,7 +62,13 @@ int main(int argc, char **argv) {
   // Construct observables
   // here there is too much indirection 
   typedef PlaquetteMod<HMCWrapper::ImplPolicy> PlaqObs;
-  TheHMC.Resources.AddObservable<PlaqObs>();                //it is NAN!
+  TheHMC.Resources.AddObservable<PlaqObs>();                
+ 
+ /*
+  typedef dSdetaMod<HMCWrapper::ImplPolicy> PlaqObs;
+  TheHMC.Resources.AddObservable<PlaqObs>();                
+*/
+
   //////////////////////////////////////////////
 
   /////////////////////////////////////////////////////////////

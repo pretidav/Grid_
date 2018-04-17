@@ -57,7 +57,7 @@ int main (int argc, char **argv)
   //std::string file("./ckpoint_lat.4000");
   //NerscIO::readConfiguration(Umu,header,file);
 
-#define NONABELIAN_SF
+#define ABELIAN_SF
 int T   = Umu._grid->GlobalDimensions()[3];
 int X   = Umu._grid->GlobalDimensions()[0];
 int Y   = Umu._grid->GlobalDimensions()[1];
@@ -220,7 +220,7 @@ dSdU_mu   = peekLorentz(dSdU,i);
     PokeIndex<LorentzIndex>(mom,mommu,mu);
     // fourth order exponential approx
     parallel_for(auto i=mom.begin();i<mom.end();i++){ // exp(pmu dt) * Umu
-      Uprime[i](mu) = Umu[i](mu) + mom[i](mu)*Umu[i](mu)*dt + 0.5*mom[i](mu)*mom[i](mu)*Umu[i](mu)*dt*dt ;
+      Uprime[i](mu) = Umu[i](mu) + mom[i](mu)*Umu[i](mu)*dt ;
     }
   }
   ComplexD Sprime    = Action.S(Uprime);
@@ -240,7 +240,7 @@ dSdU_mu   = peekLorentz(dSdU,i);
     // dU/dt = p U
     // so dSdt = trace( dUdt dSdU) = trace( p UdSdUmu ) 
     dS = dS - trace(mommu*UdSdUmu)*dt*2.0;
-    std::cout<< UdSdUmu << std::endl;
+   // std::cout<< UdSdUmu << std::endl;
   }
   ComplexD dSpred    = sum(dS);
 

@@ -214,6 +214,7 @@ RealD NORM;
     LatticeCoordinate(coorStaple, 3);
     int Time = staple._grid->GlobalDimensions()[3];
 
+
  for (int mu=0;mu<Nd-1;mu++){
    staple=zero;
    stapleT=zero;
@@ -221,7 +222,7 @@ RealD NORM;
       if (nu != mu) {
         tmp1 = Cshift(U_mu[nu], mu, 1);
         tmp2 = Cshift(U_mu[mu], nu, 1);
-        if (nu==Nd){ 
+        if (nu==Nd-1){ 
           stapleT = tmp1* adj(U_mu[nu]*tmp2)*factor[1];
           stapleT = where((coorStaple==Time-2), RealD(ct_SF)*stapleT, stapleT);
           staple += stapleT;
@@ -229,7 +230,7 @@ RealD NORM;
           staple += tmp1* adj(U_mu[nu]*tmp2)*factor[0];
          }
         tmp2 = adj(U_mu[mu]*tmp1)*U_mu[nu];
-        if (nu==Nd){
+        if (nu==Nd-1){
         stapleT = Cshift(tmp2, nu, -1)*factor[1];
         stapleT = where((coorStaple==1), RealD(ct_SF)*stapleT, stapleT);
         staple += stapleT;

@@ -172,7 +172,7 @@ for (int nu=0;nu<Nd-1;nu++){
   Lattice<iScalar<vInteger>> coorT(tmp._grid);
   LatticeCoordinate(coorT, 3);  
 
-  tmpBC   = where( ((coorT==0) || (coorT==(T-2))), tmp, 0.*tmp); //no faces moltiplicity ?
+  tmpBC   = where( ((coorT==0) || (coorT==(T-2))), tmp, 0.*tmp); 
   tmpBLK  = where( ((coorT==0) || (coorT==(T-2))), 0.*tmp, tmp);
   PlaqDirBLK[1]+=TensorRemove(sum(trace(tmpBLK))).real();
   PlaqDirBC[1] +=TensorRemove(sum(trace(tmpBC))).real();
@@ -197,7 +197,7 @@ RealD NORM;
     std::vector<RealD> factor(2);
     std::vector<LatticeColourMatrix> dSdU_mu(Nd, U._grid);
     std::vector<LatticeColourMatrix> U_mu(Nd, U._grid);
-    LatticeColourMatrix staple(U._grid);
+    LatticeColourMatrix staple(U._grid), stapleT(U._grid);
     LatticeColourMatrix tmp1(U._grid),tmp2(U._grid);
 
     for (int mu = 0; mu < Nd; mu++) {
@@ -205,6 +205,8 @@ RealD NORM;
     }
 
     staple = zero;    
+    stapleT=zero;
+
     factor[0] =  vbeta[0] / RealD(Nc)*0.5;
     factor[1] =  vbeta[1] / RealD(Nc)*0.5;
     
@@ -214,20 +216,23 @@ RealD NORM;
 
  for (int mu=0;mu<Nd-1;mu++){
    staple=zero;
+   stapleT=zero;
   for (int nu=0; nu<Nd; nu++) {
       if (nu != mu) {
         tmp1 = Cshift(U_mu[nu], mu, 1);
         tmp2 = Cshift(U_mu[mu], nu, 1);
-        if (nu==3){ 
-          staple += tmp1* adj(U_mu[nu]*tmp2)*factor[1];
-          staple = where((coorStaple==Time-2), ct_SF*staple, staple);
+        if (nu==Nd){ 
+          stapleT = tmp1* adj(U_mu[nu]*tmp2)*factor[1];
+          stapleT = where((coorStaple==Time-2), RealD(ct_SF)*stapleT, stapleT);
+          staple += stapleT;
         } else {
           staple += tmp1* adj(U_mu[nu]*tmp2)*factor[0];
          }
         tmp2 = adj(U_mu[mu]*tmp1)*U_mu[nu];
-        if (nu==3){
-        staple += Cshift(tmp2, nu, -1)*factor[1];
-        staple = where((coorStaple==1), ct_SF*staple, staple);
+        if (nu==Nd){
+        stapleT = Cshift(tmp2, nu, -1)*factor[1];
+        stapleT = where((coorStaple==1), RealD(ct_SF)*stapleT, stapleT);
+        staple += stapleT;
         } else {
         staple += Cshift(tmp2, nu, -1)*factor[0];
         }
@@ -245,7 +250,7 @@ RealD NORM;
     tmp2 = adj(U_mu[3]*tmp1)*U_mu[nu];
     staple += Cshift(tmp2, nu, -1);
   }
-  staple = where((coorStaple==0 || coorStaple==Time-2), ct_SF*staple, staple); //only T-2 slice is relevant here.
+  staple = where((coorStaple==0 || coorStaple==Time-2), RealD(ct_SF)*staple, staple); //only T-2 slice is relevant here.
   dSdU_mu[3] = U_mu[3]*staple;
   dSdU_mu[3] = Ta(dSdU_mu[3]) * factor[1];  //all those staples carry beta[1] 
   

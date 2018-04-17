@@ -140,14 +140,14 @@ std::vector<LatticeColourMatrix> Ubc(Nd, &Grid);
     pokeLorentz(Umu, U[mu], mu);
   }
   
- std::cout << Umu << std::endl;
+ //std::cout << Umu << std::endl;
 #endif
 
 //-----------
 //     TEST Action: 
 
 //NOW ANISOTROPIC GAUGE ACTION
-std::vector<double> beta={1.0,1.0};
+std::vector<double> beta={6.0,6.0};
 RealD ct=1.0,cs=1.0;
 
 WilsonGaugeSFActionR Action(beta,cs,ct);
@@ -155,13 +155,22 @@ std::cout<< Action.LogParameters() << std::endl;
 RealD S;
 S=Action.S(Umu);
 std::cout << GridLogMessage << "S_Wilson_SF= " << S << std::endl;
+RealD theta = 1./3. * M_PI * 1./X/X;
+RealD norm = 12.*(X*X)*( std::sin(theta) + std::sin(2.*theta) ); 
+RealD uSF, dSde;
+dSde = ColourWilsonLoops::dSdeta(Umu, beta[1], ct);
+uSF= norm/dSde;
+std::cout << GridLogMessage << "k   : " << norm << std::endl;
+std::cout << GridLogMessage << "uSF : " << uSF << std::endl;
+
 
 //WILSON PLAQUETTE ACTION
-WilsonGaugeActionR Action2(1.0);
-std::cout<< Action2.LogParameters() << std::endl;
-RealD S2;
-S2=Action2.S(Umu);
-std::cout << GridLogMessage << "S_Wilson_periodic= " << S2 << std::endl;
+//WilsonGaugeActionR Action2(1.0);
+//std::cout<< Action2.LogParameters() << std::endl;
+//RealD S2;
+//S2=Action2.S(Umu);
+//std::cout << GridLogMessage << "S_Wilson_periodic= " << S2 << std::endl;
+
 
 
 //-----------
@@ -174,27 +183,27 @@ std::cout << GridLogMessage << "S_Wilson_periodic= " << S2 << std::endl;
 LatticeGaugeField dSdU(&Grid);   
 Action.deriv(Umu, dSdU); 
 
-std::cout << dSdU << std::endl;
+//std::cout << dSdU << std::endl;
 
 // WILSON PLAQUETTE ACTION
-LatticeGaugeField dSdU2(&Grid);   
-Action2.deriv(Umu, dSdU2); 
+//LatticeGaugeField dSdU2(&Grid);   
+//Action2.deriv(Umu, dSdU2); 
 
 LatticeColourMatrix dSdU_mu(&Grid), dSdU2_mu(&Grid);
 LatticeColourMatrix diff(&Grid);
 for (int i=0;i<Nd;i++){
 dSdU_mu   = peekLorentz(dSdU,i);
-dSdU2_mu  = peekLorentz(dSdU2,i);
+//dSdU2_mu  = peekLorentz(dSdU2,i);
 //std::cout << "dSdU_SF[" << i <<"]:" << dSdU_mu << std::endl;
 //std::cout << "dSdU_Wilson[" << i <<"]:" << dSdU2_mu << std::endl;
-diff=dSdU_mu-dSdU2_mu;
+//diff=dSdU_mu-dSdU2_mu;
 //std::cout << GridLogMessage << "DIFF[" << i << "]= " << diff << std::endl;
 }
 
   ////////////////////////////////////
   // Modify the gauge field a little 
   ////////////////////////////////////
-  RealD dt = 0.000001;
+  RealD dt = 0.0001;
 
   LatticeColourMatrix mommu(&Grid); 
   LatticeColourMatrix forcemu(&Grid); 
@@ -205,10 +214,13 @@ diff=dSdU_mu-dSdU2_mu;
 //fix boundaries in mom
   for(int mu=0;mu<Nd;mu++){
     SU3::GaussianFundamentalLieAlgebraMatrix(pRNG, mommu); // Traceless antihermitian momentum; gaussian in lie alg
+    LatticeCoordinate(coor, 3);
+    if (mu!=Nd) mommu = where(coor==0 || coor==T-1, 0.*mommu, mommu);
+    if (mu==Nd) mommu = where(coor==T-1, 0.*mommu, mommu);
     PokeIndex<LorentzIndex>(mom,mommu,mu);
     // fourth order exponential approx
     parallel_for(auto i=mom.begin();i<mom.end();i++){ // exp(pmu dt) * Umu
-      Uprime[i](mu) = Umu[i](mu) + mom[i](mu)*Umu[i](mu)*dt ;
+      Uprime[i](mu) = Umu[i](mu) + mom[i](mu)*Umu[i](mu)*dt + 0.5*mom[i](mu)*mom[i](mu)*Umu[i](mu)*dt*dt ;
     }
   }
   ComplexD Sprime    = Action.S(Uprime);
@@ -228,6 +240,7 @@ diff=dSdU_mu-dSdU2_mu;
     // dU/dt = p U
     // so dSdt = trace( dUdt dSdU) = trace( p UdSdUmu ) 
     dS = dS - trace(mommu*UdSdUmu)*dt*2.0;
+    std::cout<< UdSdUmu << std::endl;
   }
   ComplexD dSpred    = sum(dS);
 

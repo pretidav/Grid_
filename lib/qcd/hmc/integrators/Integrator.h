@@ -136,9 +136,8 @@ class Integrator {
           int X   = U._grid->GlobalDimensions()[0];
           int Y   = U._grid->GlobalDimensions()[1];
           int Z   = U._grid->GlobalDimensions()[2];
-          force_abs = std::sqrt(norm2(force)/(U._grid->gSites() - X*Y*Z));
+          force_abs = std::sqrt(norm2(force)/(U._grid->gSites() - X*Y*Z)); //not sure about this modification!
       }
-      //Real force_abs = std::sqrt(norm2(force)/U._grid->gSites()); //this have to be corrected   ????!!!!!
 
       std::cout << GridLogIntegrator << "Force average: " << force_abs << std::endl;
       Mom -= force * ep; 

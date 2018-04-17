@@ -64,8 +64,9 @@ int main(int argc, char **argv) {
 
 
 
-  std::vector<RealD> beta={6.0,6.0};
-  RealD ct=1.0,cs=1.0;
+  std::vector<RealD> beta={8.8997,8.8997};
+  RealD ct=1.0 - 6/beta[0] * 0.089; 
+  RealD cs=1.0;
 
 
   //////////////////////////////////////////////
@@ -88,7 +89,7 @@ int main(int argc, char **argv) {
 
   //ACTION: 
   WilsonGaugeSFActionR Waction(beta,cs,ct);
-  //WilsonGaugeActionR Waction2(beta[0]);
+  //WilsonGaugeActionR Waction(beta[0]);
 
   Waction.isSF = true;
   ActionLevel<HMCWrapper::Field> Level1(1);

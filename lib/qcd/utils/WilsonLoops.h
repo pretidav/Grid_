@@ -221,7 +221,7 @@ public:
      out-= TensorRemove(sum(trace(E8prime[mu]))).real();
     }
 
-    RealD norm = - BetaT*CT/(3.*X);   
+    RealD norm = - BetaT*CT/(Nc*X);   
     return norm*out;
   };
 

@@ -161,6 +161,7 @@ RealD uSF, dSde;
 dSde = ColourWilsonLoops::dSdeta(Umu, beta[1], ct);
 uSF= norm/dSde;
 std::cout << GridLogMessage << "k   : " << norm << std::endl;
+std::cout << GridLogMessage << "dS/deta : " << dSde << std::endl;
 std::cout << GridLogMessage << "uSF : " << uSF << std::endl;
 
 

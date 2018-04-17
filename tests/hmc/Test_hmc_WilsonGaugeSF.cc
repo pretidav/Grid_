@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
 
 
 
-  std::vector<RealD> beta={8.8997,8.8997};
+  std::vector<RealD> beta={9.1544,9.1544};
   RealD ct=1.0 - 6./beta[0] * 0.089; 
   RealD cs=1.0;
 

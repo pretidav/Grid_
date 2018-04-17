@@ -61,28 +61,32 @@ int main(int argc, char **argv) {
   RNGpar.parallel_seeds = "6 7 8 9 10";
   TheHMC.Resources.SetRNGSeeds(RNGpar);
 
-  // Construct observables
-  // here there is too much indirection 
-  typedef PlaquetteMod<HMCWrapper::ImplPolicy> PlaqObs;
-  TheHMC.Resources.AddObservable<PlaqObs>();                
- 
- /*
-  typedef dSdetaMod<HMCWrapper::ImplPolicy> PlaqObs;
-  TheHMC.Resources.AddObservable<PlaqObs>();                
-*/
-
-  //////////////////////////////////////////////
-
-  /////////////////////////////////////////////////////////////
-  // Collect actions, here use more encapsulation
-  // need wrappers of the fermionic classes 
-  // that have a complex construction
-  // standard
 
 
 
   std::vector<RealD> beta={6.0,6.0};
   RealD ct=1.0,cs=1.0;
+
+
+  //////////////////////////////////////////////
+  //ONLINE MEASUREMENTS:
+  
+  //Plaquette
+  typedef PlaquetteMod<HMCWrapper::ImplPolicy> PlaqObs;
+  TheHMC.Resources.AddObservable<PlaqObs>();         
+
+  //SF COUPLING
+  typedef dSdetaMod<HMCWrapper::ImplPolicy> dSdeta;
+  dSdetaParameters uSFParms;
+  uSFParms.interval = 1;
+  uSFParms.betaT = beta[1];  
+  uSFParms.ct_SF = ct;   
+  TheHMC.Resources.AddObservable<dSdeta>(uSFParms);                
+  //////////////////////////////////////////////
+
+
+
+  //ACTION: 
   WilsonGaugeSFActionR Waction(beta,cs,ct);
   //WilsonGaugeActionR Waction2(beta[0]);
 

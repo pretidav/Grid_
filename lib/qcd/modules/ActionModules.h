@@ -109,8 +109,15 @@ class BetaGaugeActionParameters : Serializable {
     RealD, beta);
 };
 
-
-
+//SF SPECIFIC
+class BetaGaugeSFActionParameters : Serializable {
+ public:
+  GRID_SERIALIZABLE_CLASS_MEMBERS(BetaGaugeSFActionParameters, 
+    std::vector <double>, betav,
+    RealD, cs_SF,
+    RealD, ct_SF);
+};
+//
 
 template <class Impl >
 class WilsonGModule: public ActionModule<WilsonGaugeAction<Impl>, BetaGaugeActionParameters> {
@@ -123,6 +130,21 @@ class WilsonGModule: public ActionModule<WilsonGaugeAction<Impl>, BetaGaugeActio
   }
 
 };
+
+//SF SPECIFIC
+template <class Impl >
+class WilsonGSFModule: public ActionModule<WilsonGaugeSFAction<Impl>, BetaGaugeSFActionParameters> {
+  typedef ActionModule<WilsonGaugeSFAction<Impl>, BetaGaugeSFActionParameters> ActionBase;
+  using ActionBase::ActionBase; // for constructors
+
+  // acquire resource
+  virtual void initialize(){
+    this->ActionPtr.reset(new WilsonGaugeSFAction<Impl>(this->Par_.betav, this->Par_.cs_SF, this->Par_.ct_SF));
+  }
+
+};
+//
+
 
 template <class Impl >
 class PlaqPlusRectangleGModule: public ActionModule<PlaqPlusRectangleAction<Impl>, PlaqPlusRectangleGaugeActionParameters> {

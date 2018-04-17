@@ -129,10 +129,10 @@ class Integrator {
       Real force_abs;
 
        if (as[level].actions.at(a)->isSF==false){
-          std::cout<< "updateP: not SF" << std::endl;
+          //std::cout<< "updateP: not SF" << std::endl;
           force_abs = std::sqrt(norm2(force)/(U._grid->gSites())); 
       } else if (as[level].actions.at(a)->isSF==true){
-          std::cout<< "updateP: SF" << std::endl;
+          //std::cout<< "updateP: SF" << std::endl;
           int X   = U._grid->GlobalDimensions()[0];
           int Y   = U._grid->GlobalDimensions()[1];
           int Z   = U._grid->GlobalDimensions()[2];
@@ -161,10 +161,10 @@ class Integrator {
     // exponential of Mom*U in the gauge fields case
 
     if(as[0].actions.at(0)->isSF==true){
-    std::cout<< "updateU: SF" << std::endl;
+    //std::cout<< "updateU: SF" << std::endl;
     FieldImplementation::update_fieldSF(Mom, U, ep); 
     } else if (as[0].actions.at(0)->isSF==false){
-    std::cout<< "updateU: not SF" << std::endl;
+    //std::cout<< "updateU: not SF" << std::endl;
     FieldImplementation::update_field(Mom, U, ep); 
     }
 
@@ -239,11 +239,11 @@ class Integrator {
     std::cout << GridLogIntegrator << "Integrator refresh\n";
 
     if(as[0].actions.at(0)->isSF==true){
-    std::cout<< "refreshP: SF" << std::endl;
+    //std::cout<< "refreshP: SF" << std::endl;
     FieldImplementation::generate_momentaSF(P, pRNG); //No updates on the boundary!
     }
     else if (as[0].actions.at(0)->isSF==false){
-      std::cout<< "refreshP: not SF" << std::endl;
+    //std::cout<< "refreshP: not SF" << std::endl;
     FieldImplementation::generate_momenta(P, pRNG); //No updates on the boundary!
     }
 

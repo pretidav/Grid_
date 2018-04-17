@@ -120,22 +120,21 @@ class TopologicalChargeMod: public ObservableModule<TopologicalCharge<Impl>, Top
   TopologicalChargeMod(): ObsBase(){}
 };
 
-/*
-
+//SF SPECIFIC
 template < class Impl >
-class SFcouplingMod: public ObservableModule<SFcoupling<Impl>, SFcoulingParameters>{
-  typedef ObservableModule<SFcoupling<Impl>, SFcoupling> ObsBase;
+class dSdetaMod: public ObservableModule<dSdeta<Impl>, dSdetaParameters>{
+  typedef ObservableModule<dSdeta<Impl>, dSdetaParameters> ObsBase;
   using ObsBase::ObsBase; // for constructors
 
   // acquire resource
   virtual void initialize(){
-    this->ObservablePtr.reset(new SFcoupling<Impl>(this->Par_));
+    this->ObservablePtr.reset(new dSdeta<Impl>(this->Par_));
   }
   public:
-  SFcouplingMod(SFcoupling Par): ObsBase(Par){}
-  SFcouplingMod(): ObsBase(){}
+  dSdetaMod(dSdetaParameters Par): ObsBase(Par){}
+  dSdetaMod(): ObsBase(){}
 };
-*/
+//
 
 }// QCD temporarily here
 

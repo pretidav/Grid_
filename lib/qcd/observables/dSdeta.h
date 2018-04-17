@@ -37,10 +37,26 @@ namespace Grid {
 namespace QCD {
 
 
-/*
+
+struct dSdetaParameters : Serializable {
+    GRID_SERIALIZABLE_CLASS_MEMBERS(dSdetaParameters,
+      int, interval,
+      RealD, betaT,
+      RealD, ct_SF);  
+
+    dSdetaParameters(int interval = 1):
+        interval(interval){}
+
+    template <class ReaderClass >
+      dSdetaParameters(Reader<ReaderClass>& Reader){
+        read(Reader, "uSF_Measurement", *this);
+  }
+};
+
 // this is only defined for a gauge theory
 template <class Impl>
-class dSdetaLogger : public HmcObservable<typename Impl::Field> {
+class dSdeta : public HmcObservable<typename Impl::Field> {
+      dSdetaParameters Pars;
  public:
   // here forces the Impl to be of gauge fields
   // if not the compiler will complain
@@ -49,26 +65,49 @@ class dSdetaLogger : public HmcObservable<typename Impl::Field> {
   // necessary for HmcObservable compatibility
   typedef typename Impl::Field Field;
 
+
+    dSdeta(int interval = 1):
+        Pars(interval){}
+    
+    dSdeta(dSdetaParameters P):Pars(P){
+        std::cout << GridLogDebug << "Creating uSF coupling " << std::endl;
+    }
+
   void TrajectoryComplete(int traj,
                           Field &U,
                           GridSerialRNG &sRNG,
                           GridParallelRNG &pRNG) {
 
-    RealD dSdeta = WilsonLoops<Impl>::dSdeta(U,betav,ct_SF);
+
+   int T   = U._grid->GlobalDimensions()[3];
+   int X   = U._grid->GlobalDimensions()[0];
+   int Y   = U._grid->GlobalDimensions()[1];
+   int Z   = U._grid->GlobalDimensions()[2];
+
+   assert((X==Y)&&(Y==Z)); 
+   RealD theta = 1./3. * M_PI * 1./X/X;
+   RealD norm = 12.*(X*X)*( std::sin(theta) + std::sin(2.*theta) ); 
+
+  if (traj%Pars.interval == 0){
+    RealD u = WilsonLoops<Impl>::dSdeta(U,Pars.betaT,Pars.ct_SF);
 
     int def_prec = std::cout.precision();
 
     std::cout << GridLogMessage
         << std::setprecision(std::numeric_limits<Real>::digits10 + 1)
-        << "dSdeta: [ " << traj << " ] "<< dSdeta << std::endl;
+        << "uSF: [ " << traj << " ] "<< norm/u << std::endl;
+    std::cout << GridLogMessage
+        << std::setprecision(std::numeric_limits<Real>::digits10 + 1)
+        << "k:   [ " << traj << " ] "<< norm << std::endl;
 
     std::cout.precision(def_prec);
+  }
 
   }
 };
 
 
-*/ 
+ 
 
 
 

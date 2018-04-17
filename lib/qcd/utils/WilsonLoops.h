@@ -181,7 +181,7 @@ public:
   //////////////////////////////////////////////////
   //           g2SF= norm * dSdeta                //
   //////////////////////////////////////////////////
-  static RealD dSdeta(const GaugeLorentz &Umu, double *Beta, double CT) {
+  static RealD dSdeta(const GaugeLorentz &Umu, RealD BetaT, RealD CT) {
     std::vector<GaugeMat> U(Nd, Umu._grid);
     ColourMatrix lambda8;
     RealD out;
@@ -221,7 +221,7 @@ public:
      out-= TensorRemove(sum(trace(E8prime[mu]))).real();
     }
 
-    RealD norm = - Beta[1]*CT/(3.*X);   
+    RealD norm = - BetaT*CT/(3.*X);   
     return norm*out;
   };
 

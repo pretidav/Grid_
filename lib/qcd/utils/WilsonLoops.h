@@ -193,9 +193,9 @@ public:
     int Z   = Umu._grid->GlobalDimensions()[2];
 
     lambda8=zero;
-    lambda8()()(0,0) =  1;
-    lambda8()()(1,1) = -1/2;
-    lambda8()()(2,2) = -1/2;
+    lambda8()()(0,0) =  double(1.);
+    lambda8()()(1,1) = double(-1./2);
+    lambda8()()(2,2) = double(-1./2);
     std::vector <LatticeColourMatrix> E8(Nd-1, Umu._grid), E8prime(Nd-1, Umu._grid), B(Nd, Umu._grid);  
     Lattice<iScalar<vInteger>> coor(Umu._grid);
     LatticeCoordinate(coor, 3);  
@@ -204,6 +204,7 @@ public:
      U[mu]=peekLorentz(Umu,mu); 
      B[mu]=ComplexD(0.0, 1.)*lambda8*U[mu];
     }
+
     for (int mu=0;mu<Nd-1;mu++){
       E8[mu] =      Gimpl::CovShiftForward(B[mu],mu,
                     Gimpl::CovShiftForward(U[3],3,
@@ -217,6 +218,7 @@ public:
                     Gimpl::CovShiftIdentityBackward(U[mu], mu))));
       E8prime[mu] = where(coor==T-2, E8prime[mu], 0.*E8prime[mu]);
       
+
      out+= TensorRemove(sum(trace(E8[mu]))).real();
      out-= TensorRemove(sum(trace(E8prime[mu]))).real();
     }

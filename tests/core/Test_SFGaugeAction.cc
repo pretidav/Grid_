@@ -71,19 +71,19 @@ int Tmax=T-1;
 
 //SF boundary implementation:
 std::vector<double> phi_SF(3),phiprime_SF(3),omega(3);
-double eta=0, nuSF=0;
+double eta=-0., nuSF=0.;
 
-omega[0] = 1;
-omega[1] = -1/2 + nuSF;
-omega[2] = -1/2 - nuSF;
+omega[0] = 1.;
+omega[1] = -1./2. + nuSF;
+omega[2] = -1./2. - nuSF;
 
-phi_SF[0] = eta*omega[0] - M_PI/3;
+phi_SF[0] = eta*omega[0] - M_PI/3.;
 phi_SF[1] = eta*omega[1];
-phi_SF[2] = eta*omega[2] + M_PI/3;
+phi_SF[2] = eta*omega[2] + M_PI/3.;
 
-phiprime_SF[0] = -phi_SF[0] - 4/3 * M_PI;
-phiprime_SF[1] = -phi_SF[2] + 2/3 * M_PI;
-phiprime_SF[2] = -phi_SF[1] + 2/3 * M_PI;
+phiprime_SF[0] = -phi_SF[0] - 4./3. * M_PI;
+phiprime_SF[1] = -phi_SF[2] + 2./3. * M_PI;
+phiprime_SF[2] = -phi_SF[1] + 2./3. * M_PI;
 
 LatticeColourMatrix W_bc(Umu._grid),Wprime_bc(Umu._grid);
 
@@ -108,9 +108,9 @@ for (int i = 0; i < Umu._grid->oSites(); i++){
   LatticeCoordinate(coor, 3);  
   U[3] = where(coor==(Tmax), 0.*U[3], U[3]);
   pokeLorentz(Umu, U[3], 3);
- 
+  LatticeCoordinate(coor, 3); 
+  
   for (int mu=0;mu<Nd-1;mu++){
-    LatticeCoordinate(coor, 3);
     U[mu] = where(coor==0, W_bc, U[mu]);
     U[mu] = where(coor==(Tmax), Wprime_bc, U[mu]);
     pokeLorentz(Umu, U[mu], mu);

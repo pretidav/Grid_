@@ -791,15 +791,15 @@ template<typename GaugeField,typename GaugeMat>
     W_bc=zero;
     Wprime_bc=zero;
 
-    omega[0] = 1;
-    omega[1] = -1/2 + nuSF;
-    omega[2] = -1/2 - nuSF;
-    phi_SF[0] = eta*omega[0] - M_PI/3;
+    omega[0] = 1.;
+    omega[1] = -1./2. + nuSF;
+    omega[2] = -1./2. - nuSF;
+    phi_SF[0] = eta*omega[0] - M_PI/3.;
     phi_SF[1] = eta*omega[1];
-    phi_SF[2] = eta*omega[2] + M_PI/3;
-    phiprime_SF[0] = -phi_SF[0] - 4/3 * M_PI;
-    phiprime_SF[1] = -phi_SF[2] + 2/3 * M_PI;
-    phiprime_SF[2] = -phi_SF[1] + 2/3 * M_PI;   
+    phi_SF[2] = eta*omega[2] + M_PI/3.;
+    phiprime_SF[0] = -phi_SF[0] - 4./3. * M_PI;
+    phiprime_SF[1] = -phi_SF[2] + 2./3. * M_PI;
+    phiprime_SF[2] = -phi_SF[1] + 2./3. * M_PI;   
 
   
     for (int i = 0; i < out._grid->oSites(); i++){
@@ -852,15 +852,15 @@ template<typename GaugeField,typename GaugeMat>
     W_bc=zero;
     Wprime_bc=zero;
 
-    omega[0] = 1;
-    omega[1] = -1/2 + nuSF;
-    omega[2] = -1/2 - nuSF;
-    phi_SF[0] = eta*omega[0] - M_PI/3;
+    omega[0] = 1.;
+    omega[1] = -1./2. + nuSF;
+    omega[2] = -1./2. - nuSF;
+    phi_SF[0] = eta*omega[0] - M_PI/3.;
     phi_SF[1] = eta*omega[1];
-    phi_SF[2] = eta*omega[2] + M_PI/3;
-    phiprime_SF[0] = -phi_SF[0] - 4/3 * M_PI;
-    phiprime_SF[1] = -phi_SF[2] + 2/3 * M_PI;
-    phiprime_SF[2] = -phi_SF[1] + 2/3 * M_PI;   
+    phi_SF[2] = eta*omega[2] + M_PI/3.;
+    phiprime_SF[0] = -phi_SF[0] - 4./3. * M_PI;
+    phiprime_SF[1] = -phi_SF[2] + 2./3. * M_PI;
+    phiprime_SF[2] = -phi_SF[1] + 2./3. * M_PI;   
 
     for (int i = 0; i < out._grid->oSites(); i++){
       W_bc._odata[i]()()(0, 0) = exp(ComplexD(0.0, 1./X)*phi_SF[0]);
@@ -912,16 +912,16 @@ template<typename GaugeField,typename GaugeMat>
     W_bc=zero;
     Wprime_bc=zero;
 
-    omega[0] = 1;
-    omega[1] = -1/2 + nuSF;
-    omega[2] = -1/2 - nuSF;
+    omega[0] = 1.;
+    omega[1] = -1./2. + nuSF;
+    omega[2] = -1./2. - nuSF;
 
-    phi_SF[0] = eta*omega[0] - M_PI/3;
+    phi_SF[0] = eta*omega[0] - M_PI/3.;
     phi_SF[1] = eta*omega[1];
-    phi_SF[2] = eta*omega[2] + M_PI/3;
-    phiprime_SF[0] = -phi_SF[0] - 4/3 * M_PI;
-    phiprime_SF[1] = -phi_SF[2] + 2/3 * M_PI;
-    phiprime_SF[2] = -phi_SF[1] + 2/3 * M_PI;   
+    phi_SF[2] = eta*omega[2] + M_PI/3.;
+    phiprime_SF[0] = -phi_SF[0] - 4./3. * M_PI;
+    phiprime_SF[1] = -phi_SF[2] + 2./3. * M_PI;
+    phiprime_SF[2] = -phi_SF[1] + 2./3. * M_PI;   
 
 
     for (int i = 0; i < out._grid->oSites(); i++){

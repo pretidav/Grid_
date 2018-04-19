@@ -92,6 +92,7 @@ class PlaquetteMod: public ObservableModule<PlaquetteLogger<Impl>, NoParameters>
   PlaquetteMod(): ObsBase(NoParameters()){}
 };
 
+
 template < class Impl >
 class PolyakovMod: public ObservableModule<PolyakovLogger<Impl>, NoParameters>{
   typedef ObservableModule<PolyakovLogger<Impl>, NoParameters> ObsBase;
@@ -133,6 +134,20 @@ class dSdetaMod: public ObservableModule<dSdeta<Impl>, dSdetaParameters>{
   public:
   dSdetaMod(dSdetaParameters Par): ObsBase(Par){}
   dSdetaMod(): ObsBase(){}
+};
+
+
+template < class Impl >
+class PlaquetteSFMod: public ObservableModule<PlaquetteSFLogger<Impl>, NoParameters>{
+  typedef ObservableModule<PlaquetteSFLogger<Impl>, NoParameters> ObsBase;
+  using ObsBase::ObsBase; // for constructors
+
+  // acquire resource
+  virtual void initialize(){
+    this->ObservablePtr.reset(new PlaquetteSFLogger<Impl>());
+  }
+  public:
+  PlaquetteSFMod(): ObsBase(NoParameters()){}
 };
 //
 

@@ -123,7 +123,7 @@ public:
     return sumplaq / vol / faces / Nc; // Nd , Nc dependent... FIXME
   }
 
-  static Real avgPlaquetteBLK(const GaugeLorentz &Umu) {
+  static Real avgPlaquetteSF(const GaugeLorentz &Umu) {
     int ndim = Umu._grid->_ndimension;
     int X   = Umu._grid->GlobalDimensions()[0];
     int Y   = Umu._grid->GlobalDimensions()[1];
@@ -179,7 +179,7 @@ public:
 
 
   //////////////////////////////////////////////////
-  //           g2SF= norm * dSdeta                //
+  //           g2SF= k / dSdeta                   //
   //////////////////////////////////////////////////
   static RealD dSdeta(const GaugeLorentz &Umu, RealD BetaT, RealD CT) {
     std::vector<GaugeMat> U(Nd, Umu._grid);
@@ -212,12 +212,16 @@ public:
                     Gimpl::CovShiftIdentityBackward(U[3], 3))));
       E8[mu] = where(coor==0, E8[mu], 0.*E8[mu]);
     
+std::cout << "E8[" << mu << "]: " << TensorRemove(sum(trace(E8[mu]))).real() << std::endl;
+
       E8prime[mu] = Gimpl::CovShiftForward(U[3],3,
                     Gimpl::CovShiftForward(B[mu],mu,
                     Gimpl::CovShiftBackward(U[3],3,
                     Gimpl::CovShiftIdentityBackward(U[mu], mu))));
       E8prime[mu] = where(coor==T-2, E8prime[mu], 0.*E8prime[mu]);
       
+
+ std::cout << "E8prime[" << mu << "]: " << TensorRemove(sum(trace(E8prime[mu]))).real() << std::endl;
 
      out+= TensorRemove(sum(trace(E8[mu]))).real();
      out-= TensorRemove(sum(trace(E8prime[mu]))).real();

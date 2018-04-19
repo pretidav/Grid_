@@ -99,8 +99,7 @@ class dSdeta : public HmcObservable<typename Impl::Field> {
 
     std::cout << GridLogMessage
         << std::setprecision(std::numeric_limits<Real>::digits10 + 1)
-        << "uSF: [ " << traj << " ] "<< norm/u << std::endl;
-
+        << "1/uSF: [ " << traj << " ] "<< u/norm << std::endl;
     std::cout.precision(def_prec);
   }
 

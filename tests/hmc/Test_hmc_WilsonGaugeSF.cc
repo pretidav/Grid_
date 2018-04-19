@@ -73,13 +73,13 @@ int main(int argc, char **argv) {
   //ONLINE MEASUREMENTS:
   
   //Plaquette
-  typedef PlaquetteMod<HMCWrapper::ImplPolicy> PlaqObs;
+  typedef PlaquetteSFMod<HMCWrapper::ImplPolicy> PlaqObs;
   TheHMC.Resources.AddObservable<PlaqObs>();         
 
   //SF COUPLING
   typedef dSdetaMod<HMCWrapper::ImplPolicy> dSdeta;
   dSdetaParameters uSFParms;
-  uSFParms.interval = 1;
+  uSFParms.interval = 10;
   uSFParms.betaT = beta[1];  
   uSFParms.ct_SF = ct;   
   TheHMC.Resources.AddObservable<dSdeta>(uSFParms);                

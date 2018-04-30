@@ -167,6 +167,10 @@ for (int mu=1;mu<Nd-1;mu++){
   }
 }
 
+tmpBC=zero;
+tmpBLK=zero;
+tmp=zero;
+
 for (int nu=0;nu<Nd-1;nu++){
   WilsonLoops<Gimpl>::dirPlaquette(tmp, Link, 3, nu);
   Lattice<iScalar<vInteger>> coorT(tmp._grid);
@@ -180,14 +184,17 @@ for (int nu=0;nu<Nd-1;nu++){
 
 RealD vol = U._grid->gSites();
 RealD action = 0;
-RealD NORM; 
+RealD NORM;
   for (int j=0;j<2;j++){
     PlaqDirBLK[j]*=1./(Nc);
-    PlaqDirBC[j] *=1./(Nc); 
+    PlaqDirBC[j] *=1./(Nc);
     if (j==0) NORM=0.5*cs_SF;
     if (j==1) NORM=ct_SF;
     action += vbeta[j] * (((Nd-1) * (Nd-2))*0.5 * (X*Y*Z*T-2*X*Y*Z - (j)*X*Y*Z)  - PlaqDirBLK[j]); //this modification in the volume account for the missing temporal plaqs @ x4=T
-    action += vbeta[j] * (((Nd-1) * (Nd-2))*0.5 * (2*X*Y*Z)  - PlaqDirBC[j]) *NORM;
+    action += vbeta[j] * (((Nd-1) * (Nd-2))*0.5 * (2*X*Y*Z)  - PlaqDirBC[j]) * NORM;
+
+    //std::cout << "actionBLK: " << vbeta[j] * (((Nd-1) * (Nd-2))*0.5 * (X*Y*Z*T-2*X*Y*Z - (j)*X*Y*Z)  - PlaqDirBLK[j]) << std::endl;    
+    //std::cout << "actionBC: "  << vbeta[j] * (((Nd-1) * (Nd-2))*0.5 * (2*X*Y*Z)  - PlaqDirBC[j]) * NORM << std::endl;
   }
   return action;
 };

@@ -10,6 +10,7 @@ Author: Azusa Yamaguchi <ayamaguc@staffmail.ed.ac.uk>
 Author: Peter Boyle <paboyle@ph.ed.ac.uk>
 Author: neo <cossu@post.kek.jp>
 Author: paboyle <paboyle@ph.ed.ac.uk>
+Author: David Preti <david.preti@to.infn.it> 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -128,11 +129,70 @@ public:
     int X   = Umu._grid->GlobalDimensions()[0];
     int Y   = Umu._grid->GlobalDimensions()[1];
     int Z   = Umu._grid->GlobalDimensions()[2];
-    
-    Real sumplaq = sumPlaquette(Umu);
-    Real vol = Umu._grid->gSites();
-    Real faces = (1.0 * ndim * (ndim - 1)) / 2.0;
-    return sumplaq / (vol-X*Y*Z) / faces / Nc; // Nc dependent... FIXME
+    int T   = Umu._grid->GlobalDimensions()[3];
+
+    LatticeColourMatrix tmp(Umu._grid), tmpBLK(Umu._grid),tmpBC(Umu._grid);
+    std::vector<LatticeColourMatrix> Link(Nd, Umu._grid);
+    tmp=zero;
+    tmpBLK=zero;
+    tmpBC=zero;
+
+    std::vector<RealD> PlaqDirBLK(2);
+    PlaqDirBLK[0]=0.0;
+    PlaqDirBLK[1]=0.0;
+    std::vector<RealD> PlaqDirBC(2);
+    PlaqDirBC[0]=0.0;
+    PlaqDirBC[1]=0.0;
+
+    for (int mu=0;mu<Nd;mu++){
+      Link[mu] = PeekIndex<LorentzIndex>(Umu, mu);
+    }
+
+    for (int mu=1;mu<Nd-1;mu++){
+      for (int nu=0;nu<mu;nu++){
+	WilsonLoops<Gimpl>::dirPlaquette(tmp, Link, mu, nu);
+	Lattice<iScalar<vInteger>> coorS(tmp._grid);
+	LatticeCoordinate(coorS, 3);
+
+	tmpBC   = where( ((coorS==0) || (coorS==(T-1))), tmp, 0.*tmp);
+	tmpBLK  = where( ((coorS==0) || (coorS==(T-1))), 0.*tmp, tmp);
+	PlaqDirBLK[0]+=TensorRemove(sum(trace(tmpBLK))).real();
+	PlaqDirBC[0] +=TensorRemove(sum(trace(tmpBC))).real();
+      }
+    }
+
+tmpBC=zero;
+tmpBLK=zero;
+tmp=zero;
+
+    for (int nu=0;nu<Nd-1;nu++){
+      WilsonLoops<Gimpl>::dirPlaquette(tmp, Link, 3, nu);
+      Lattice<iScalar<vInteger>> coorT(tmp._grid);
+      LatticeCoordinate(coorT, 3);
+
+      tmpBC   = where( ((coorT==0) || (coorT==(T-2))), tmp, 0.*tmp);
+      tmpBLK  = where( ((coorT==0) || (coorT==(T-2))), 0.*tmp, tmp);
+      PlaqDirBLK[1]+=TensorRemove(sum(trace(tmpBLK))).real();
+      PlaqDirBC[1] +=TensorRemove(sum(trace(tmpBC))).real();
+    }
+
+    RealD vol = Umu._grid->gSites();
+    RealD sumplaq = 0.;
+    RealD NORM;
+    for (int j=0;j<2;j++){
+           // PlaqDirBLK[j]*=1./(Nc);
+           // PlaqDirBC[j] *=1./(Nc);
+      if (j==0) NORM=0.5;
+      if (j==1) NORM=1.0;
+      //std::cout << "plaqDirBLK[" << j << "]: " << PlaqDirBLK[j] << std::endl;
+      //std::cout << "plaqDirBC[" << j << "]: " << PlaqDirBC[j] << std::endl; 
+      sumplaq += double(PlaqDirBLK[j]);      // ( (Nd-1)*(Nd-2)*0.5 * (X*Y*Z*T-2.*X*Y*Z - (j)*X*Y*Z) ); 
+      //std::cout << "j: " << j << " -> " << sumplaq << std::endl;
+      sumplaq += double(PlaqDirBC[j] * NORM);       //  ( (Nd-1)*(Nd-2)*0.5 * (2.*X*Y*Z) ) ;
+      //std::cout << "j: " << j << " -> " << sumplaq << std::endl;
+    }
+    return sumplaq / Nc / (X*Y*Z*(T-1)*Nd*(Nd-1)*0.5);   //( (Nd-1)*(Nd-2)* (X*Y*Z*(T-1)))/Nc   ; 
+    //is used to normalize the averaged plaq to be =1 for trivial cnfg.
   }
   
   //////////////////////////////////////////////////
@@ -227,7 +287,7 @@ std::cout << "E8[" << mu << "]: " << TensorRemove(sum(trace(E8[mu]))).real() << 
      out-= TensorRemove(sum(trace(E8prime[mu]))).real();
     }
 
-    RealD norm = - BetaT*CT/(Nc*X);   
+    RealD norm = - BetaT*CT/(Nc*(T-1));   
     return norm*out;
   };
 

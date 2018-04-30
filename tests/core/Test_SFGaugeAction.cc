@@ -57,7 +57,7 @@ int main (int argc, char **argv)
   //std::string file("./ckpoint_lat.4000");
   //NerscIO::readConfiguration(Umu,header,file);
 
-#define ABELIAN_SF
+#define NONABELIAN_SF
 int T   = Umu._grid->GlobalDimensions()[3];
 int X   = Umu._grid->GlobalDimensions()[0];
 int Y   = Umu._grid->GlobalDimensions()[1];
@@ -71,7 +71,7 @@ int Tmax=T-1;
 
 //SF boundary implementation:
 std::vector<double> phi_SF(3),phiprime_SF(3),omega(3);
-double eta=-0., nuSF=0.;
+double eta=0., nuSF=0.;
 
 omega[0] = 1.;
 omega[1] = -1./2. + nuSF;
@@ -164,6 +164,10 @@ std::cout << GridLogMessage << "k   : " << norm << std::endl;
 std::cout << GridLogMessage << "dS/deta : " << dSde << std::endl;
 std::cout << GridLogMessage << "uSF : " << uSF << std::endl;
 
+
+RealD plaq;
+plaq = ColourWilsonLoops::avgPlaquetteSF(Umu);
+std::cout << GridLogMessage << "PlaqSF :" << plaq << std::endl;
 
 //WILSON PLAQUETTE ACTION
 //WilsonGaugeActionR Action2(1.0);

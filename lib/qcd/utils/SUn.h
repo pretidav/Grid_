@@ -767,7 +767,7 @@ template<typename GaugeField,typename GaugeMat>
 // SF Gauge boundaries from " f a luscher and t renormalizable probe "
 
   template <typename GaugeField>
-  static void HotConfigurationSF(GridParallelRNG &pRNG, GaugeField &out, double eta=0, double nuSF=0) {
+  static void HotConfigurationSF(GridParallelRNG &pRNG, GaugeField &out, RealD eta=0.0, RealD nuSF=0.0) {
     typedef typename GaugeField::vector_type vector_type;
     typedef iSUnMatrix<vector_type> vMatrixType;
     typedef Lattice<vMatrixType> LatticeMatrixType;
@@ -829,7 +829,7 @@ template<typename GaugeField,typename GaugeMat>
 
 
   template<typename GaugeField>
-  static void TepidConfigurationSF(GridParallelRNG &pRNG,GaugeField &out, double eta=0, double nuSF=0){
+  static void TepidConfigurationSF(GridParallelRNG &pRNG,GaugeField &out, double eta=0.0, double nuSF=0.0){
     typedef typename GaugeField::vector_type vector_type;
     typedef iSUnMatrix<vector_type> vMatrixType;
     typedef Lattice<vMatrixType> LatticeMatrixType;

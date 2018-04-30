@@ -42,7 +42,8 @@ int main(int argc, char **argv) {
   HMCWrapper TheHMC;
 
   // Grid from the command line
-  TheHMC.Resources.AddFourDimGrid("gauge");
+  std::vector<int> vSIMD({2,1,1,1});
+  TheHMC.Resources.AddFourDimGrid("gauge",vSIMD);
   // Possibile to create the module by hand 
   // hardcoding parameters or using a Reader
 
@@ -51,7 +52,7 @@ int main(int argc, char **argv) {
   CheckpointerParameters CPparams;  
   CPparams.config_prefix = "ckpoint_lat";
   CPparams.rng_prefix = "ckpoint_rng";
-  CPparams.saveInterval = 1;
+  CPparams.saveInterval = 10000000;
   CPparams.format = "IEEE64BIG";
   
   TheHMC.Resources.LoadNerscCheckpointer(CPparams);
@@ -79,7 +80,7 @@ int main(int argc, char **argv) {
   //SF COUPLING
   typedef dSdetaMod<HMCWrapper::ImplPolicy> dSdeta;
   dSdetaParameters uSFParms;
-  uSFParms.interval = 10;
+  uSFParms.interval = 1;
   uSFParms.betaT = beta[1];  
   uSFParms.ct_SF = ct;   
   TheHMC.Resources.AddObservable<dSdeta>(uSFParms);                

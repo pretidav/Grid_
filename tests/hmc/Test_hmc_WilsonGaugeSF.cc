@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
   CheckpointerParameters CPparams;  
   CPparams.config_prefix = "ckpoint_lat";
   CPparams.rng_prefix = "ckpoint_rng";
-  CPparams.saveInterval = 10000000;
+  CPparams.saveInterval = 10;
   CPparams.format = "IEEE64BIG";
   
   TheHMC.Resources.LoadNerscCheckpointer(CPparams);
@@ -65,8 +65,8 @@ int main(int argc, char **argv) {
 
 
 
-  std::vector<RealD> beta={9.1544,9.1544};
-  RealD ct=1.0 - 6./beta[0] * 0.089; 
+  std::vector<RealD> beta={10,10};
+  RealD ct=1.0;// - 6./beta[0] * 0.089; 
   RealD cs=1.0;
 
 
@@ -75,20 +75,20 @@ int main(int argc, char **argv) {
   
   //Plaquette
   typedef PlaquetteSFMod<HMCWrapper::ImplPolicy> PlaqObs;
-  TheHMC.Resources.AddObservable<PlaqObs>();         
+  TheHMC.Resources.AddObservable<PlaqObs>();
 
   //SF COUPLING
   typedef dSdetaMod<HMCWrapper::ImplPolicy> dSdeta;
   dSdetaParameters uSFParms;
   uSFParms.interval = 1;
-  uSFParms.betaT = beta[1];  
-  uSFParms.ct_SF = ct;   
-  TheHMC.Resources.AddObservable<dSdeta>(uSFParms);                
+  uSFParms.betaT = beta[1];
+  uSFParms.ct_SF = ct;
+  TheHMC.Resources.AddObservable<dSdeta>(uSFParms);
   //////////////////////////////////////////////
 
 
 
-  //ACTION: 
+  //ACTION:
   WilsonGaugeSFActionR Waction(beta,cs,ct);
   //WilsonGaugeActionR Waction(beta[0]);
 
@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
   TheHMC.TheAction.push_back(Level1);
   /////////////////////////////////////////////////////////////
 
-  // HMC parameters are serialisable 
+  // HMC parameters are serialisable
   TheHMC.Parameters.MD.MDsteps = 20;
   TheHMC.Parameters.MD.trajL   = 1.0;
 

@@ -253,9 +253,9 @@ tmp=zero;
     int Z   = Umu._grid->GlobalDimensions()[2];
 
     lambda8=zero;
-    lambda8()()(0,0) =  double(1.);
-    lambda8()()(1,1) = double(-1./2);
-    lambda8()()(2,2) = double(-1./2);
+    lambda8()()(0,0) = 1.0;
+    lambda8()()(1,1) = -0.5;
+    lambda8()()(2,2) = -0.5;
     std::vector <LatticeColourMatrix> E8(Nd-1, Umu._grid), E8prime(Nd-1, Umu._grid), B(Nd, Umu._grid);  
     Lattice<iScalar<vInteger>> coor(Umu._grid);
     LatticeCoordinate(coor, 3);  

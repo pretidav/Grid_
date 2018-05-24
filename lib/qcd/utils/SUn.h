@@ -985,9 +985,9 @@ template<typename GaugeField,typename GaugeMat>
     U[3] = where(coor==(Tmax), 0.*U[3], U[3]);
     pokeLorentz(out, U[3], 3);
   
-    for (int mu=0;mu<Nd-1;mu++){
+    for (int mu=0;mu<Nd-1;mu++){     //THIS HAVE TO BE FIXED WITH INTERNAL TIMES AS BOUNDARIES
       LatticeCoordinate(coor, 3);
-      U[mu] = where(coor==0, Ubc[mu], U[mu]);
+      U[mu] = where(coor==0, Ubc[mu], U[mu]);   
       U[mu] = where(coor==(Tmax), Ubc[mu], U[mu]);
       pokeLorentz(out, U[mu], mu);
     }
@@ -1023,7 +1023,7 @@ template<typename GaugeField,typename GaugeMat>
     U[3] = where(coor==(Tmax), 0.*U[3], U[3]);
     pokeLorentz(out, U[3], 3);
   
-    for (int mu=0;mu<Nd-1;mu++){
+    for (int mu=0;mu<Nd-1;mu++){//THIS HAVE TO BE FIXED WITH INTERNAL TIMES AS BOUNDARIES
       LatticeCoordinate(coor, 3);
       U[mu] = where(coor==0, Ubc[mu], U[mu]);
       U[mu] = where(coor==(Tmax), Ubc[mu], U[mu]);
@@ -1061,7 +1061,7 @@ template<typename GaugeField,typename GaugeMat>
     U[3] = where(coor==(Tmax), 0.*U[3], U[3]);
     pokeLorentz(out, U[3], 3);
   
-    for (int mu=0;mu<Nd-1;mu++){
+    for (int mu=0;mu<Nd-1;mu++){//THIS HAVE TO BE FIXED WITH INTERNAL TIMES AS BOUNDARIES
       LatticeCoordinate(coor, 3);
       U[mu] = where(coor==0, Ubc[mu], U[mu]);
       U[mu] = where(coor==(Tmax), Ubc[mu], U[mu]);

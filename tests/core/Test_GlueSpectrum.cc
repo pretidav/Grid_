@@ -52,8 +52,8 @@ int main (int argc, char **argv)
   LatticeGaugeField Umu(&Grid);
   std::vector<LatticeColourMatrix> U(Nd, &Grid);
 
-int STARTCNFG=20;
-int ENDCNFG=100;
+int STARTCNFG=50;
+int ENDCNFG=10010;
 
 for (int cnfg=STARTCNFG;cnfg<ENDCNFG;cnfg++){
   FieldMetaData header;
@@ -234,7 +234,7 @@ for (int j=0;j<2;j++){
 
 std::cout << "2x2 Wilson Loop Correlator" << std::endl;
 for (int t=0;t<T;t++){
-  std::cout << t << " " << (P2x2t0pp[t0]*P2x2t0pp[t]) << " " << P2x2t0pp[t0] << " " << P2x2t0pp[t] << " " << (P2x2t2pp[t0]*P2x2t2pp[t]) << " " << P2x2t2pp[t0] << " " << P2x2t2pp[t] << std::endl;
+//  std::cout << t << " " << (P2x2t0pp[t0]*P2x2t0pp[t]) << " " << P2x2t0pp[t0] << " " << P2x2t0pp[t] << " " << (P2x2t2pp[t0]*P2x2t2pp[t]) << " " << P2x2t2pp[t0] << " " << P2x2t2pp[t] << std::endl;
 }
 
 

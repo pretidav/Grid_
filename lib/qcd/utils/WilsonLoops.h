@@ -66,11 +66,34 @@ public:
            Gimpl::CovShiftForward(U[nu],nu,
            Gimpl::CovShiftBackward(U[mu],mu,
            Gimpl::CovShiftIdentityBackward(U[nu], nu))));
-
-
-
-
   }
+
+  
+  static void dirPlaquette2x2(GaugeMat &plaq, const std::vector<GaugeMat> &U,
+                           const int mu, const int nu) {
+    
+
+    //P(y)=
+    //x->x->x
+    //|     |
+    //x  y  x
+    //|     |
+    //x<-x<-x
+    //^
+    //|mu 
+    //| 
+    //-----> nu 
+    
+
+    GaugeMat tmp(plaq._grid);
+    tmp = Gimpl::CovShiftForward(U[mu],mu,Gimpl::CovShiftForward(U[mu],mu,
+           Gimpl::CovShiftForward(U[nu],nu,Gimpl::CovShiftForward(U[nu],nu,
+           Gimpl::CovShiftBackward(U[mu],mu,Gimpl::CovShiftBackward(U[mu],mu,
+           Gimpl::CovShiftBackward(U[nu],nu,Gimpl::CovShiftIdentityBackward(U[nu], nu))))))));
+     
+     plaq = Cshift(Cshift(plaq, mu, -1), nu, -1);          
+  }
+
   //////////////////////////////////////////////////
   // trace of directed plaquette oriented in mu,nu plane
   //////////////////////////////////////////////////

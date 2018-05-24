@@ -52,7 +52,7 @@ int main (int argc, char **argv)
   LatticeGaugeField Umu(&Grid);
   std::vector<LatticeColourMatrix> U(Nd, &Grid);
 
-int STARTCNFG=1;
+int STARTCNFG=20;
 int ENDCNFG=100;
 
 for (int cnfg=STARTCNFG;cnfg<ENDCNFG;cnfg++){
@@ -118,28 +118,123 @@ std::cout << "#############################################" << std::endl;
 // ##########################################################
 //   <TrRe[Plaq(t0)]TrRe[Plaq(t)]>
 // ##########################################################
-std::vector<LatticeColourMatrix> SpacePlaq(Nd-1, &Grid);
-t0=1;
+std::vector<LatticeColourMatrix> SpacePlaq0pp(Nd-1, &Grid);
+t0=0;
 i=0;
 
+
+//0++
 for (int nu=1;nu<Nd-1;nu++){
   for (int mu=0;mu<nu;mu++){
-    WilsonLoops<PeriodicGimplR>::dirPlaquette(SpacePlaq[i], U, mu, nu);
+    WilsonLoops<PeriodicGimplR>::dirPlaquette(SpacePlaq0pp[i], U, mu, nu);
     i++;
   }
 }
-std::vector<TComplex> SpacePlaqSum(T);
-std::vector<RealD> Pt(T);
-N=1.0/(X*Y*Z*Nc*(Nd-1));  
+std::vector<TComplex> SpacePlaqSum0pp(T);
+std::vector<RealD> Pt0pp(T);
+for (int t=0;t<T;t++) Pt0pp[t]=0.0;
+
+N=1.0/(Nc*X*Y*Z); //  /Nd-1/(X*Y*Z) 
 for (int j=0;j<Nd-1;j++){
-  sliceSum( trace(SpacePlaq[j]), SpacePlaqSum, 3);
+  sliceSum( trace(SpacePlaq0pp[j]), SpacePlaqSum0pp, 3);
   for (int t=0;t<T;t++){
-    Pt[t] += N*TensorRemove(SpacePlaqSum[t]).real();
+    Pt0pp[t] += N*TensorRemove(SpacePlaqSum0pp[t]).real();
   }
 }
+
+//2++
+std::vector<LatticeColourMatrix> SpacePlaq2pp(2, &Grid);
+i=0;
+int mu=0;
+
+for (int nu=1;nu<Nd-1;nu++){
+    WilsonLoops<PeriodicGimplR>::dirPlaquette(SpacePlaq2pp[i], U, mu, nu);
+    i++;
+  }
+
+std::vector<TComplex> SpacePlaqSum2pp(T);
+std::vector<RealD> Pt2pp(T);
+for (int t=0;t<T;t++) Pt2pp[t]=0.0;
+
+N=1.0/(Nc*X*T*Z);  // /(X*Y*Z)/2.0
+
+for (int j=0;j<2;j++){
+  sliceSum( trace(SpacePlaq2pp[j]), SpacePlaqSum2pp, 3);
+  for (int t=0;t<T;t++){
+    if (j==0){
+    Pt2pp[t] += N*TensorRemove(SpacePlaqSum2pp[t]).real();
+    } else if (j==1){
+    Pt2pp[t] -= N*TensorRemove(SpacePlaqSum2pp[t]).real();
+    }
+  }
+}
+
 std::cout << "Fundamental Wilson Loop Correlator" << std::endl;
 for (int t=0;t<T;t++){
-  std::cout << t << " " << (Pt[t0]*Pt[t]) << std::endl;
+  std::cout << t << " " << (Pt0pp[t0]*Pt0pp[t]) << " " << Pt0pp[t0] << " " << Pt0pp[t] << " " << (Pt2pp[t0]*Pt2pp[t]) << " " << Pt2pp[t0] << " " << Pt2pp[t] << std::endl;
+  //(Rt[t0]*Rt[t]) << " " << Rt[t0] << " " << Rt[t] <<  std::endl;
+}
+
+
+
+// ##########################################################
+//   <TrRe[Plaq2x2(t0)]TrRe[Plaq2x2(t)]>
+// ##########################################################
+std::vector<LatticeColourMatrix> SpacePlaq2x20pp(Nd-1, &Grid);
+t0=0;
+i=0;
+
+
+//0++
+for (int nu=1;nu<Nd-1;nu++){
+  for (int mu=0;mu<nu;mu++){
+    WilsonLoops<PeriodicGimplR>::dirPlaquette2x2(SpacePlaq2x20pp[i], U, mu, nu);
+    i++;
+  }
+}
+std::vector<TComplex> SpacePlaq2x2Sum0pp(T);
+std::vector<RealD> P2x2t0pp(T);
+for (int t=0;t<T;t++) P2x2t0pp[t]=0.0;
+
+N=1.0/(Nc*X*Y*Z); //  /Nd-1/(X*Y*Z) 
+for (int j=0;j<Nd-1;j++){
+  sliceSum( trace(SpacePlaq2x20pp[j]), SpacePlaq2x2Sum0pp, 3);
+  for (int t=0;t<T;t++){
+    P2x2t0pp[t] += N*TensorRemove(SpacePlaqSum0pp[t]).real();
+  }
+}
+
+
+//2++
+std::vector<LatticeColourMatrix> SpacePlaq2x22pp(2, &Grid);
+i=0;
+mu=0;
+
+for (int nu=1;nu<Nd-1;nu++){
+    WilsonLoops<PeriodicGimplR>::dirPlaquette2x2(SpacePlaq2x22pp[i], U, mu, nu);
+    i++;
+  }
+
+std::vector<TComplex> SpacePlaq2x2Sum2pp(T);
+std::vector<RealD> P2x2t2pp(T);
+for (int t=0;t<T;t++) P2x2t2pp[t]=0.0;
+
+N=1.0/(Nc*X*Y*Z);  // /(X*Y*Z)/2.0
+
+for (int j=0;j<2;j++){
+  sliceSum( trace(SpacePlaq2x22pp[j]), SpacePlaq2x2Sum2pp, 3);
+  for (int t=0;t<T;t++){
+    if (j==0){
+    P2x2t2pp[t] += N*TensorRemove(SpacePlaq2x2Sum2pp[t]).real();
+    } else if (j==1){
+    P2x2t2pp[t] -= N*TensorRemove(SpacePlaq2x2Sum2pp[t]).real();
+    }
+  }
+}
+
+std::cout << "2x2 Wilson Loop Correlator" << std::endl;
+for (int t=0;t<T;t++){
+  std::cout << t << " " << (P2x2t0pp[t0]*P2x2t0pp[t]) << " " << P2x2t0pp[t0] << " " << P2x2t0pp[t] << " " << (P2x2t2pp[t0]*P2x2t2pp[t]) << " " << P2x2t2pp[t0] << " " << P2x2t2pp[t] << std::endl;
 }
 
 

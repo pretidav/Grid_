@@ -985,10 +985,18 @@ template<typename GaugeField,typename GaugeMat>
     U[3] = where(coor==(Tmax), 0.*U[3], U[3]);
     pokeLorentz(out, U[3], 3);
   
-    for (int mu=0;mu<Nd-1;mu++){     //THIS HAVE TO BE FIXED WITH INTERNAL TIMES AS BOUNDARIES
+    std::vector<LatticeColourMatrix> ShiftedUbc1(Nd, in._grid);
+    std::vector<LatticeColourMatrix> ShiftedUbc2(Nd, in._grid);
+    int Tbc   = in._grid->GlobalDimensions()[3];
+    int Tshift=(Tbc+1)/2 - 1; // this is hardcoded.  I am picking the two intermediate times.
+
+
+    for (int mu=0;mu<Nd-1;mu++){   
+      ShiftedUbc1[mu]=Cshift(Ubc[mu],3, Tshift);  
+      ShiftedUbc2[mu]=Cshift(Ubc[mu],3, -Tshift);   
       LatticeCoordinate(coor, 3);
-      U[mu] = where(coor==0, Ubc[mu], U[mu]);   
-      U[mu] = where(coor==(Tmax), Ubc[mu], U[mu]);
+      U[mu] = where(coor==0, ShiftedUbc1[mu], U[mu]);   
+      U[mu] = where(coor==(Tmax), ShiftedUbc2[mu], U[mu]);
       pokeLorentz(out, U[mu], mu);
     }
   }
@@ -1023,10 +1031,17 @@ template<typename GaugeField,typename GaugeMat>
     U[3] = where(coor==(Tmax), 0.*U[3], U[3]);
     pokeLorentz(out, U[3], 3);
   
-    for (int mu=0;mu<Nd-1;mu++){//THIS HAVE TO BE FIXED WITH INTERNAL TIMES AS BOUNDARIES
+    std::vector<LatticeColourMatrix> ShiftedUbc1(Nd, in._grid);
+    std::vector<LatticeColourMatrix> ShiftedUbc2(Nd, in._grid);
+    int Tbc   = in._grid->GlobalDimensions()[3];
+    int Tshift=(Tbc+1)/2 - 1;  // this is hardcoded.  I am picking the two intermediate times.
+
+    for (int mu=0;mu<Nd-1;mu++){   
+      ShiftedUbc1[mu]=Cshift(Ubc[mu],3, Tshift);  
+      ShiftedUbc2[mu]=Cshift(Ubc[mu],3, -Tshift);   
       LatticeCoordinate(coor, 3);
-      U[mu] = where(coor==0, Ubc[mu], U[mu]);
-      U[mu] = where(coor==(Tmax), Ubc[mu], U[mu]);
+      U[mu] = where(coor==0, ShiftedUbc1[mu], U[mu]);   
+      U[mu] = where(coor==(Tmax), ShiftedUbc2[mu], U[mu]);
       pokeLorentz(out, U[mu], mu);
     }
   }
@@ -1061,13 +1076,21 @@ template<typename GaugeField,typename GaugeMat>
     U[3] = where(coor==(Tmax), 0.*U[3], U[3]);
     pokeLorentz(out, U[3], 3);
   
-    for (int mu=0;mu<Nd-1;mu++){//THIS HAVE TO BE FIXED WITH INTERNAL TIMES AS BOUNDARIES
+    std::vector<LatticeColourMatrix> ShiftedUbc1(Nd, in._grid);
+    std::vector<LatticeColourMatrix> ShiftedUbc2(Nd, in._grid);
+    int Tbc   = in._grid->GlobalDimensions()[3];
+    int Tshift=(Tbc+1)/2 - 1;   // this is hardcoded.  I am picking the two intermediate times.
+
+    for (int mu=0;mu<Nd-1;mu++){   
+      ShiftedUbc1[mu]=Cshift(Ubc[mu],3, Tshift);  
+      ShiftedUbc2[mu]=Cshift(Ubc[mu],3, -Tshift);   
       LatticeCoordinate(coor, 3);
-      U[mu] = where(coor==0, Ubc[mu], U[mu]);
-      U[mu] = where(coor==(Tmax), Ubc[mu], U[mu]);
+      U[mu] = where(coor==0, ShiftedUbc1[mu], U[mu]);   
+      U[mu] = where(coor==(Tmax), ShiftedUbc2[mu], U[mu]);
       pokeLorentz(out, U[mu], mu);
     }
   }
+
 
 //=============================================
 //=============================================

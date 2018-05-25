@@ -121,7 +121,7 @@ for (int i = 0; i < Umu._grid->oSites(); i++){
 #ifdef NONABELIAN_SF
 //SF non-abelian boundary implementation:
 LatticeGaugeField Umu_bc(&Grid);      //input boundary cnfg
-SU3::ColdConfiguration(pRNG,Umu_bc);   //this is something coming from an higher lvl hmc
+SU3::HotConfiguration(pRNG,Umu_bc);   //this is something coming from an higher lvl hmc
 std::vector<LatticeColourMatrix> Ubc(Nd, &Grid);
 
   for (int mu=0;mu<Nd;mu++){
@@ -134,13 +134,26 @@ std::vector<LatticeColourMatrix> Ubc(Nd, &Grid);
   pokeLorentz(Umu, U[3], 3);
  
   LatticeCoordinate(coor, 3);
+  std::vector<LatticeColourMatrix> ShiftedUbc1(Nd, &Grid);
+  std::vector<LatticeColourMatrix> ShiftedUbc2(Nd, &Grid);
+
+int Tbc   = Umu_bc._grid->GlobalDimensions()[3];
+int Tshift=(Tbc+1)/2 - 1; 
+
   for (int mu=0;mu<Nd-1;mu++){
-    U[mu] = where(coor==0, Ubc[mu], U[mu]);
-    U[mu] = where(coor==(Tmax), Ubc[mu], U[mu]);
+    ShiftedUbc1[mu]=Cshift(Ubc[mu],3, Tshift);  
+    ShiftedUbc2[mu]=Cshift(Ubc[mu],3, -Tshift);  
+    U[mu] = where(coor==0, ShiftedUbc1[mu], U[mu]);
+    U[mu] = where(coor==(Tmax), ShiftedUbc2[mu], U[mu]);
     pokeLorentz(Umu, U[mu], mu);
   }
-  
- //std::cout << Umu << std::endl;
+
+ std::cout << "#######################"<< std::endl;
+ std::cout << Ubc[0] << std::endl;
+ std::cout << "#######################"<< std::endl;
+ std::cout << U[0] << std::endl;
+ std::cout << "#######################"<< std::endl;
+
 #endif
 
 //-----------

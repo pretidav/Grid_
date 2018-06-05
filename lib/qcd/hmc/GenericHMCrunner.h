@@ -116,6 +116,21 @@ class HMCWrapperTemplate: public HMCRunnerBase<ReaderClass> {
       GridCmdOptionIntVector(arg, ivec);
       Parameters.NoMetropolisUntil = ivec[0];
     }
+
+    if (GridCmdOptionExists(argv, argv + argc, "--t1")) {
+      arg = GridCmdOptionPayload(argv, argv + argc, "--t1");
+      std::vector<int> ivec(0);
+      GridCmdOptionIntVector(arg, ivec);
+      Parameters.t1 = ivec[0];
+    }
+
+    if (GridCmdOptionExists(argv, argv + argc, "--t2")) {
+      arg = GridCmdOptionPayload(argv, argv + argc, "--t2");
+      std::vector<int> ivec(0);
+      GridCmdOptionIntVector(arg, ivec);
+      Parameters.t2 = ivec[0];
+    }
+
     if (GridCmdOptionExists(argv, argv + argc, "--ParameterFile")) {
       arg = GridCmdOptionPayload(argv, argv + argc, "--ParameterFile");
       ParameterFile = arg;
@@ -191,23 +206,20 @@ class HMCWrapperTemplate: public HMCRunnerBase<ReaderClass> {
       Resources.SeedFixedIntegers();
       NerscIO::readConfiguration(U_bc, header, "configBC");
       std::cout << GridLogMessage << "Imported boundaries from: configBC" << std::endl;      
-      Implementation::HotConfigurationNonAbelianSF(Resources.GetParallelRNG(), U, U_bc);
+      Implementation::HotConfigurationNonAbelianSF(Resources.GetParallelRNG(), U, U_bc, Parameters.t1, Parameters.t2);
     } else if (Parameters.StartingType == "ColdStartNonAbelianSF") {
       // Cold start
       Resources.SeedFixedIntegers();
       NerscIO::readConfiguration(U_bc, header, "configBC");
       std::cout << GridLogMessage << "Imported boundaries from: configBC" << std::endl;
-      Implementation::ColdConfigurationNonAbelianSF(Resources.GetParallelRNG(), U, U_bc);
+      Implementation::ColdConfigurationNonAbelianSF(Resources.GetParallelRNG(), U, U_bc, Parameters.t1, Parameters.t2);
     } else if (Parameters.StartingType == "TepidStartNonAbelianSF") {
       // Tepid start
       Resources.SeedFixedIntegers();
       NerscIO::readConfiguration(U_bc, header, "configBC");
       std::cout << GridLogMessage << "Imported boundaries from: configBC" << std::endl;
-      Implementation::TepidConfigurationNonAbelianSF(Resources.GetParallelRNG(), U, U_bc);  
+      Implementation::TepidConfigurationNonAbelianSF(Resources.GetParallelRNG(), U, U_bc, Parameters.t1, Parameters.t2);  
     }
-
-// TODO checks when restarting -> something wrong is happening with the update!
-
 
 
     Smearing.set_Field(U);

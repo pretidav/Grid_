@@ -69,20 +69,51 @@ public:
   }
 
   
+  static void WilsonLoopNxM(GaugeMat &plaq, const std::vector<GaugeMat> &U,
+			    const int mu, const int nu,const int Nmu, const int Mnu) {
+
+    //  ^
+    //  |mu 
+    //  | 
+    //  -----> nu 
+
+    GaugeMat tmp1(U[0]._grid), tmp2(U[0]._grid);
+    tmp1=Gimpl::CovShiftIdentityBackward(U[nu],nu); 
+
+    for (int i=0;i<Mnu-1;i++){
+      tmp2=Gimpl::CovShiftBackward(U[nu],nu,tmp1);
+      tmp1=tmp2;
+    }
+    for (int j=0;j<Nmu;j++){
+      tmp2=Gimpl::CovShiftBackward(U[mu],mu,tmp1);
+      tmp1=tmp2;
+    }
+ for (int i=0;i<Mnu;i++){
+      tmp2=Gimpl::CovShiftForward(U[nu],nu,tmp1);
+      tmp1=tmp2;
+    }
+ for (int j=0;j<Nmu;j++){
+      tmp2=Gimpl::CovShiftForward(U[mu],mu,tmp1);
+      tmp1=tmp2;
+    }
+   plaq=tmp1;
+  }
+  
   static void dirPlaquette2x2(GaugeMat &plaq, const std::vector<GaugeMat> &U,
                            const int mu, const int nu) {
     
 
-    //P(y)=
-    //x->x->x
-    //|     |
-    //x  y  x
-    //|     |
-    //x<-x<-x
-    //^
-    //|mu 
-    //| 
-    //-----> nu 
+    //  P(y)=
+    //  x->x->x
+    //  |     |
+    //  x  y  x
+    //  |     |
+    //  x<-x<-x
+    //
+    //  ^
+    //  |mu 
+    //  | 
+    //  -----> nu 
     
 
     GaugeMat tmp(plaq._grid);

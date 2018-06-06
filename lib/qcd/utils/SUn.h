@@ -990,8 +990,6 @@ template<typename GaugeField,typename GaugeMat>
     //int Tbc   = in._grid->GlobalDimensions()[3];
     //int Tshift=(Tbc+1)/2 - 1; // this is hardcoded.  I am picking the two intermediate times.
 
-    std::cout << Ubc[0] << std::endl;
-
     for (int mu=0;mu<Nd-1;mu++){   
       ShiftedUbc1[mu]=Cshift(Ubc[mu],3, t1);  
       ShiftedUbc2[mu]=Cshift(Ubc[mu],3, -t2);   
@@ -1000,9 +998,6 @@ template<typename GaugeField,typename GaugeMat>
       U[mu] = where(coor==(Tmax), ShiftedUbc2[mu], U[mu]);
       pokeLorentz(out, U[mu], mu);
     }
-
-    std::cout << U[0] << std::endl;
-  
   }
 
   template<typename GaugeField>
@@ -1082,8 +1077,8 @@ template<typename GaugeField,typename GaugeMat>
   
     std::vector<LatticeColourMatrix> ShiftedUbc1(Nd, in._grid);
     std::vector<LatticeColourMatrix> ShiftedUbc2(Nd, in._grid);
-    int Tbc   = in._grid->GlobalDimensions()[3];
-    int Tshift=(Tbc+1)/2 - 1;   // this is hardcoded.  I am picking the two intermediate times.
+    //int Tbc   = in._grid->GlobalDimensions()[3];
+    //int Tshift=(Tbc+1)/2 - 1;   // this is hardcoded.  I am picking the two intermediate times.
 
     for (int mu=0;mu<Nd-1;mu++){   
       ShiftedUbc1[mu]=Cshift(Ubc[mu],3, t1);  

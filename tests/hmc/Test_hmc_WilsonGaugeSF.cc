@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
   GridLogLayout();
 
    // Typedefs to simplify notation
-  typedef GenericHMCRunner<MinimumNorm2> HMCWrapper;  // Uses the default minimum norm
+  typedef GenericHMCRunner<ForceGradient> HMCWrapper;  // Uses the default minimum norm
   HMCWrapper TheHMC;
 
   // Grid from the command line
@@ -62,13 +62,9 @@ int main(int argc, char **argv) {
   RNGpar.parallel_seeds = "6 7 8 9 10";
   TheHMC.Resources.SetRNGSeeds(RNGpar);
 
-
-
-
-  std::vector<RealD> beta={5.9,7.611848};
-  RealD ct=1.0;// - 6./beta[0] * 0.089; 
+  std::vector<RealD> beta={0.120408163265306,456.013551}; //
+  RealD ct=1.0;// - 6./beta[1] * 0.089; 
   RealD cs=1.0;
-
 
   //////////////////////////////////////////////
   //ONLINE MEASUREMENTS:

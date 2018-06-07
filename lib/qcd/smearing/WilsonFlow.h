@@ -160,7 +160,6 @@ RealD WilsonFlow<Gimpl>::energyDensityPlaquette(const GaugeField& U) const {
 //#define WF_TIMING 
 
 
-
 template <class Gimpl>
 void WilsonFlow<Gimpl>::smear(GaugeField& out, const GaugeField& in) const {
     out = in;
@@ -173,8 +172,8 @@ void WilsonFlow<Gimpl>::smear(GaugeField& out, const GaugeField& in) const {
         std::cout << "Time to evolve " << diff.count() << " s\n";
         #endif
         std::cout << GridLogMessage << "[WilsonFlow] Energy density (plaq) : "
-            << step << "  "
-            << energyDensityPlaquette(step,out) << std::endl;
+		  << step << "  " << tau(step) << "  " 
+		  << energyDensityPlaquette(step,out) << std::endl;
          if( step % measure_interval == 0){
          std::cout << GridLogMessage << "[WilsonFlow] Top. charge           : "
             << step << "  " 
@@ -193,16 +192,14 @@ void WilsonFlow<Gimpl>::smear_adaptive(GaugeField& out, const GaugeField& in, Re
         //std::cout << GridLogMessage << "Evolution time :"<< taus << std::endl;
         evolve_step_adaptive(out, maxTau);
         std::cout << GridLogMessage << "[WilsonFlow] Energy density (plaq) : "
-            << step << "  "
-            << energyDensityPlaquette(out) << std::endl;
+		  << step << "  " << taus << "  "
+		  << energyDensityPlaquette(out) << std::endl;
          if( step % measure_interval == 0){
          std::cout << GridLogMessage << "[WilsonFlow] Top. charge           : "
             << step << "  " 
             << WilsonLoops<PeriodicGimplR>::TopologicalCharge(out) << std::endl;
         }
     } while (taus < maxTau);
-
-
 
 }
 

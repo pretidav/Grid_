@@ -178,16 +178,16 @@ public:
     SU<Nc>::ColdConfigurationSF(pRNG, U);
   }
 
-    static inline void HotConfigurationNonAbelianSF(GridParallelRNG &pRNG, Field &U, Field &U_bc) {
-    SU<Nc>::HotConfigurationNonAbelianSF(pRNG, U, U_bc);
+    static inline void HotConfigurationNonAbelianSF(GridParallelRNG &pRNG, Field &U, Field &U_bc, int t1, int t2) {
+    SU<Nc>::HotConfigurationNonAbelianSF(pRNG, U, U_bc, t1, t2);
   }
 
-  static inline void TepidConfigurationNonAbelianSF(GridParallelRNG &pRNG, Field &U, Field &U_bc) {
-    SU<Nc>::TepidConfigurationNonAbelianSF(pRNG, U, U_bc);
+  static inline void TepidConfigurationNonAbelianSF(GridParallelRNG &pRNG, Field &U, Field &U_bc, int t1, int t2) {
+    SU<Nc>::TepidConfigurationNonAbelianSF(pRNG, U, U_bc, t1, t2);
   }
 
-  static inline void ColdConfigurationNonAbelianSF(GridParallelRNG &pRNG, Field &U, Field &U_bc) {
-    SU<Nc>::ColdConfigurationNonAbelianSF(pRNG, U, U_bc);
+  static inline void ColdConfigurationNonAbelianSF(GridParallelRNG &pRNG, Field &U, Field &U_bc, int t1, int t2) {
+    SU<Nc>::ColdConfigurationNonAbelianSF(pRNG, U, U_bc, t1, t2);
   }
 
 };

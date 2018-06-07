@@ -956,7 +956,7 @@ template<typename GaugeField,typename GaugeMat>
 // NON ABELIAN SF STUFF
 
   template <typename GaugeField>
-  static void HotConfigurationNonAbelianSF(GridParallelRNG &pRNG, GaugeField &out, GaugeField &in) {
+  static void HotConfigurationNonAbelianSF(GridParallelRNG &pRNG, GaugeField &out, GaugeField &in, int t1, int t2) {
     typedef typename GaugeField::vector_type vector_type;
     typedef iSUnMatrix<vector_type> vMatrixType;
     typedef Lattice<vMatrixType> LatticeMatrixType;
@@ -987,13 +987,12 @@ template<typename GaugeField,typename GaugeMat>
   
     std::vector<LatticeColourMatrix> ShiftedUbc1(Nd, in._grid);
     std::vector<LatticeColourMatrix> ShiftedUbc2(Nd, in._grid);
-    int Tbc   = in._grid->GlobalDimensions()[3];
-    int Tshift=(Tbc+1)/2 - 1; // this is hardcoded.  I am picking the two intermediate times.
-
+    //int Tbc   = in._grid->GlobalDimensions()[3];
+    //int Tshift=(Tbc+1)/2 - 1; // this is hardcoded.  I am picking the two intermediate times.
 
     for (int mu=0;mu<Nd-1;mu++){   
-      ShiftedUbc1[mu]=Cshift(Ubc[mu],3, Tshift);  
-      ShiftedUbc2[mu]=Cshift(Ubc[mu],3, -Tshift);   
+      ShiftedUbc1[mu]=Cshift(Ubc[mu],3, t1);  
+      ShiftedUbc2[mu]=Cshift(Ubc[mu],3, -t2);   
       LatticeCoordinate(coor, 3);
       U[mu] = where(coor==0, ShiftedUbc1[mu], U[mu]);   
       U[mu] = where(coor==(Tmax), ShiftedUbc2[mu], U[mu]);
@@ -1002,7 +1001,7 @@ template<typename GaugeField,typename GaugeMat>
   }
 
   template<typename GaugeField>
-  static void TepidConfigurationNonAbelianSF(GridParallelRNG &pRNG,GaugeField &out, GaugeField &in){
+  static void TepidConfigurationNonAbelianSF(GridParallelRNG &pRNG,GaugeField &out, GaugeField &in, int t1, int t2){
     typedef typename GaugeField::vector_type vector_type;
     typedef iSUnMatrix<vector_type> vMatrixType;
     typedef Lattice<vMatrixType> LatticeMatrixType;
@@ -1033,12 +1032,12 @@ template<typename GaugeField,typename GaugeMat>
   
     std::vector<LatticeColourMatrix> ShiftedUbc1(Nd, in._grid);
     std::vector<LatticeColourMatrix> ShiftedUbc2(Nd, in._grid);
-    int Tbc   = in._grid->GlobalDimensions()[3];
-    int Tshift=(Tbc+1)/2 - 1;  // this is hardcoded.  I am picking the two intermediate times.
+    //int Tbc   = in._grid->GlobalDimensions()[3];
+    //int Tshift=(Tbc+1)/2 - 1;  // this is hardcoded.  I am picking the two intermediate times.
 
     for (int mu=0;mu<Nd-1;mu++){   
-      ShiftedUbc1[mu]=Cshift(Ubc[mu],3, Tshift);  
-      ShiftedUbc2[mu]=Cshift(Ubc[mu],3, -Tshift);   
+      ShiftedUbc1[mu]=Cshift(Ubc[mu],3, t1);  
+      ShiftedUbc2[mu]=Cshift(Ubc[mu],3, -t2);   
       LatticeCoordinate(coor, 3);
       U[mu] = where(coor==0, ShiftedUbc1[mu], U[mu]);   
       U[mu] = where(coor==(Tmax), ShiftedUbc2[mu], U[mu]);
@@ -1047,7 +1046,7 @@ template<typename GaugeField,typename GaugeMat>
   }
 
   template<typename GaugeField>
-  static void ColdConfigurationNonAbelianSF(GridParallelRNG &pRNG,GaugeField &out, GaugeField &in){
+  static void ColdConfigurationNonAbelianSF(GridParallelRNG &pRNG,GaugeField &out, GaugeField &in, int t1, int t2){
     typedef typename GaugeField::vector_type vector_type;
     typedef iSUnMatrix<vector_type> vMatrixType;
     typedef Lattice<vMatrixType> LatticeMatrixType;
@@ -1078,12 +1077,12 @@ template<typename GaugeField,typename GaugeMat>
   
     std::vector<LatticeColourMatrix> ShiftedUbc1(Nd, in._grid);
     std::vector<LatticeColourMatrix> ShiftedUbc2(Nd, in._grid);
-    int Tbc   = in._grid->GlobalDimensions()[3];
-    int Tshift=(Tbc+1)/2 - 1;   // this is hardcoded.  I am picking the two intermediate times.
+    //int Tbc   = in._grid->GlobalDimensions()[3];
+    //int Tshift=(Tbc+1)/2 - 1;   // this is hardcoded.  I am picking the two intermediate times.
 
     for (int mu=0;mu<Nd-1;mu++){   
-      ShiftedUbc1[mu]=Cshift(Ubc[mu],3, Tshift);  
-      ShiftedUbc2[mu]=Cshift(Ubc[mu],3, -Tshift);   
+      ShiftedUbc1[mu]=Cshift(Ubc[mu],3, t1);  
+      ShiftedUbc2[mu]=Cshift(Ubc[mu],3, -t2);   
       LatticeCoordinate(coor, 3);
       U[mu] = where(coor==0, ShiftedUbc1[mu], U[mu]);   
       U[mu] = where(coor==(Tmax), ShiftedUbc2[mu], U[mu]);

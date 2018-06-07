@@ -38,11 +38,11 @@ int main(int argc, char **argv) {
   GridLogLayout();
 
    // Typedefs to simplify notation
-  typedef GenericHMCRunner<MinimumNorm2> HMCWrapper;  // Uses the default minimum norm
+  typedef GenericHMCRunner<ForceGradient> HMCWrapper;  // Uses the default minimum norm
   HMCWrapper TheHMC;
 
   // Grid from the command line
-  std::vector<int> vSIMD({2,1,1,1});
+  std::vector<int> vSIMD({2,1,1,1});    
   TheHMC.Resources.AddFourDimGrid("gauge",vSIMD);
   // Possibile to create the module by hand 
   // hardcoding parameters or using a Reader
@@ -50,9 +50,9 @@ int main(int argc, char **argv) {
 
   // Checkpointer definition
   CheckpointerParameters CPparams;  
-  CPparams.config_prefix = "ckpoint_lat";
-  CPparams.rng_prefix = "ckpoint_rng";
-  CPparams.saveInterval = 10;
+  CPparams.config_prefix = "TMP_ckpoint_lat";
+  CPparams.rng_prefix = "TMP_ckpoint_rng";
+  CPparams.saveInterval = 70;
   CPparams.format = "IEEE64BIG";
   
   TheHMC.Resources.LoadNerscCheckpointer(CPparams);
@@ -62,13 +62,9 @@ int main(int argc, char **argv) {
   RNGpar.parallel_seeds = "6 7 8 9 10";
   TheHMC.Resources.SetRNGSeeds(RNGpar);
 
-
-
-
-  std::vector<RealD> beta={10,10};
-  RealD ct=1.0;// - 6./beta[0] * 0.089; 
+  std::vector<RealD> beta={0.120408163265306,456.013551}; //
+  RealD ct=1.0;// - 6./beta[1] * 0.089; 
   RealD cs=1.0;
-
 
   //////////////////////////////////////////////
   //ONLINE MEASUREMENTS:
